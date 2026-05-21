@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-oswald: "Anton", sans-serif;
+  --font-cyber: "Anton", sans-serif;
+  --font-sans: "Rubik", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-pubg-orange: #a855f7;
+  --color-cyber-yellow: #c084fc;
+  --color-cyber-red: #f472b6;
+  --color-cyber-green: #a78bfa;
+  --color-battle-dark: #050505;
+  --color-battle-gray: #0c0d12;
+  --color-battle-light: #161a24;
+
+  --animate-scanline: scanline 6s linear infinite;
+  --animate-glitch-pulse: glitch-pulse 3s infinite alternate;
+  --animate-neon-glow: neon-glow 2s ease-in-out infinite alternate;
+  --animate-shake: shake 0.5s ease-in-out infinite;
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  @keyframes glitch-pulse {
+    0% { text-shadow: 2px 0 0 rgba(168, 85, 247, 0.5), -2px 0 0 rgba(239, 68, 68, 0.5); }
+    100% { text-shadow: -2px 0 0 rgba(168, 85, 247, 0.5), 2px 0 0 rgba(239, 68, 68, 0.5); }
+  }
+  @keyframes neon-glow {
+    0% { box-shadow: 0 0 5px rgba(168, 85, 247, 0.2), 0 0 10px rgba(168, 85, 247, 0.1); }
+    100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.6), 0 0 25px rgba(168, 85, 247, 0.3); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-1px, -1px); }
+    30% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, 1px); }
+    70% { transform: translate(1px, -1px); }
+    90% { transform: translate(-1px, -1px); }
+  }
+}
+
+/* Custom Tactical Scanline Overlay and Gaming Presets in Violet */
+.tactical-scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.tactical-scanline::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(168, 85, 247, 0.04), rgba(168, 85, 247, 0.01), rgba(168, 85, 247, 0.04));
+  z-index: 2;
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+}
+
+.glitch-text-hover:hover {
+  animation: shake 0.3s infinite;
+  color: var(--color-pubg-orange);
+}
+
+/* Custom Classes from Sophisticated Dark design */
+.font-display {
+  font-family: 'Anton', sans-serif;
+}
+
+.glitch-border {
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  position: relative;
+}
+
+.glitch-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px solid rgba(168, 85, 247, 0.1);
+  pointer-events: none;
+}
+
+.scanline {
+  background: linear-gradient(to bottom, transparent 50%, rgba(168, 85, 247, 0.05) 50%);
+  background-size: 100% 4px;
+}
+
+.skew-tag {
+  transform: skewX(-15deg);
+}
+
+.skew-text {
+  transform: skewX(15deg);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #a855f7;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+  height: 100% !important;
+}
