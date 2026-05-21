@@ -9,7 +9,7 @@ interface RulesProps {
 }
 
 export default function RulesRecruitment({ onBack }: RulesProps) {
-  const { rules: contextRules, settings, submitRecruitment } = useClan();
+  const { rules: contextRules, settings, submitRecruitment, roles } = useClan();
   const [rules, setRules] = useState<ClanRule[]>(contextRules);
 
   useEffect(() => {
@@ -17,6 +17,12 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
       setRules(contextRules);
     }
   }, [contextRules]);
+
+  useEffect(() => {
+    if (roles && roles.length > 0) {
+      setRecruitmentForm(prev => ({ ...prev, role: prev.role || roles[0].name }));
+    }
+  }, [roles]);
 
   const [openRuleId, setOpenRuleId] = useState<string | null>("1");
   const [recruitmentForm, setRecruitmentForm] = useState<Omit<RecruitmentForm, 'kd'>>({
@@ -175,11 +181,11 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
         {/* Left Col: Accordion of Clan Rules (5 columns) */}
         <div className="lg:col-span-5 space-y-6">
           {(settings.recruitmentImageUrl || settings.rulesImageUrl) && (
-            <div className="w-full rounded-lg overflow-hidden border border-pubg-orange/30 mb-6 bg-black relative">
+            <div className="w-full max-h-56 sm:max-h-64 rounded-lg overflow-hidden border border-pubg-orange/30 mb-6 bg-black/40 relative flex items-center justify-center">
               <img 
                 src={settings.recruitmentImageUrl || settings.rulesImageUrl || ""} 
                 alt="Rules Banner" 
-                className="w-full h-auto object-contain opacity-90 mx-auto"
+                className="w-full max-h-56 sm:max-h-64 object-contain opacity-90 mx-auto"
               />
             </div>
           )}
@@ -314,10 +320,20 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
                       onChange={handleInputChange}
                       className="w-full bg-battle-dark border border-gray-700 rounded px-3 py-2 text-white font-mono text-sm focus:border-pubg-orange focus:outline-hidden"
                     >
-                      <option value="Assaulter">Штурмовик (Assaulter)</option>
-                      <option value="Sniper">Снайпер (Sniper)</option>
-                      <option value="Scout">Разведчик (Scout)</option>
-                      <option value="Support">Прикрытие (Support)</option>
+                      {roles && roles.length > 0 ? (
+                        roles.map((r) => (
+                          <option key={r.id} value={r.name}>
+                            {r.name}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="Assaulter">Штурмовик (Assaulter)</option>
+                          <option value="Sniper">Снайпер (Sniper)</option>
+                          <option value="Scout">Разведчик (Scout)</option>
+                          <option value="Support">Прикрытие (Support)</option>
+                        </>
+                      )}
                     </select>
                   </div>
 

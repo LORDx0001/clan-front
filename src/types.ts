@@ -71,3 +71,8 @@ export interface RecruitmentForm {
   discordTelegram: string;
   about: string;
 }
+
+export interface PlayerRole {
+  id: number;
+  name: string;
+}

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Player, Announcement, GalleryItem, ScheduleEvent, ClanRule, RecruitmentForm } from '../types';
+import { Player, Announcement, GalleryItem, ScheduleEvent, ClanRule, RecruitmentForm, PlayerRole } from '../types';
 import * as mockData from '../data/clanData';
 
 // API Configuration
@@ -31,6 +31,7 @@ interface ClanContextType {
   schedule: ScheduleEvent[];
   rules: ClanRule[];
   gallery: GalleryItem[];
+  roles: PlayerRole[];
   loading: boolean;
   error: string | null;
   submitRecruitment: (form: FormData) => Promise<{
@@ -68,6 +69,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
   const [schedule, setSchedule] = useState<ScheduleEvent[]>([]);
   const [rules, setRules] = useState<ClanRule[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [roles, setRoles] = useState<PlayerRole[]>([]);
   
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +121,13 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (galleryRes.ok) {
           const galleryData = await galleryRes.json();
           setGallery(galleryData);
+        }
+
+        // 7. Roles
+        const rolesRes = await fetch(`${API_BASE_URL}/roles/`);
+        if (rolesRes.ok) {
+          const rolesData = await rolesRes.json();
+          setRoles(rolesData);
         }
 
         setError(null);
@@ -179,6 +188,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         schedule,
         rules,
         gallery,
+        roles,
         loading,
         error,
         submitRecruitment

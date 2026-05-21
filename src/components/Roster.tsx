@@ -9,7 +9,7 @@ interface RosterProps {
 }
 
 export default function Roster({ onBack }: RosterProps) {
-  const { players: contextPlayers, settings, gallery } = useClan();
+  const { players: contextPlayers, settings, gallery, roles } = useClan();
   const [players, setPlayers] = useState<Player[]>(contextPlayers);
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -50,8 +50,8 @@ export default function Roster({ onBack }: RosterProps) {
     return Array.from(new Set(files)).filter(Boolean);
   };
 
-  // Extract unique roles dynamically from the actual players loaded from DB!
-  const uniqueRoles = Array.from(new Set(players.map(p => p.role).filter(Boolean)));
+  // Dynamic roles loaded from the backend PlayerRole model
+  const uniqueRoles = (roles || []).map(r => r.name);
 
   const filteredPlayers = players.filter(player => {
     if (activeFilter === 'All') return true;
