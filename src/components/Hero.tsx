@@ -22,14 +22,24 @@ export default function Hero({ onTabChange }: HeroProps) {
   const isVideo = settings.heroBackgroundType === 'video';
   const slides = settings.heroSlides || [];
 
-  // Slideshow transition interval
+  const goToNextSlide = () => {
+    if (slides.length <= 1) return;
+    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  // Slideshow transition interval: 5 seconds for photos, video plays to completion
   useEffect(() => {
     if (slides.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [slides]);
+    const currentSlide = slides[currentSlideIndex];
+    
+    // Only set automatic transition timer if current slide is a photo
+    if (currentSlide && currentSlide.type !== 'video') {
+      const timer = setTimeout(() => {
+        goToNextSlide();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [slides, currentSlideIndex]);
 
   // Glitch effect logic
   useEffect(() => {
@@ -63,7 +73,9 @@ export default function Hero({ onTabChange }: HeroProps) {
                     {isSlideVideo ? (
                       <video
                         src={slide.url}
-                        autoPlay loop muted playsInline
+                        autoPlay muted playsInline
+                        loop={false}
+                        onEnded={goToNextSlide}
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
