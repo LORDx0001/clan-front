@@ -174,14 +174,13 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
         
         {/* Left Col: Accordion of Clan Rules (5 columns) */}
         <div className="lg:col-span-5 space-y-6">
-          {settings.rulesImageUrl && (
-            <div className="w-full h-44 rounded-lg overflow-hidden border border-pubg-orange/30 mb-6 bg-black relative">
+          {(settings.recruitmentImageUrl || settings.rulesImageUrl) && (
+            <div className="w-full rounded-lg overflow-hidden border border-pubg-orange/30 mb-6 bg-black relative">
               <img 
-                src={settings.rulesImageUrl} 
+                src={settings.recruitmentImageUrl || settings.rulesImageUrl || ""} 
                 alt="Rules Banner" 
-                className="w-full h-full object-cover opacity-85"
+                className="w-full h-auto object-contain opacity-90 mx-auto"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-battle-dark via-transparent to-black/10" />
             </div>
           )}
 
@@ -277,17 +276,6 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
                   Заполните анкету игровых показателей. Наш алгоритм проведет автоматический скоринг по уровню активности и распределит вас на подходящий этап отбора.
                 </p>
               </div>
-
-              {settings.recruitmentImageUrl && (
-                <div className="w-full h-44 rounded-lg overflow-hidden border border-pubg-orange/30 mb-4 bg-black relative">
-                  <img 
-                    src={settings.recruitmentImageUrl} 
-                    alt="Recruitment Banner" 
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-battle-gray via-transparent to-black/10" />
-                </div>
-              )}
 
               <form onSubmit={handleFormSubmit} className="space-y-4 pt-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
