@@ -51,6 +51,25 @@ export default function Roster({ onBack }: RosterProps) {
     return Array.from(new Set(files)).filter(Boolean);
   };
 
+  const getClanRoleBadge = (role?: string, displayName?: string) => {
+    if (!role) return null;
+    let colorClass = "";
+    if (role === 'leader') {
+      colorClass = "bg-yellow-500/90 text-black border border-yellow-400 font-bold shadow-[0_0_15px_rgba(234,179,8,0.6)]";
+    } else if (role === 'deputy') {
+      colorClass = "bg-orange-600/90 text-white border border-orange-500 font-bold shadow-[0_0_15px_rgba(249,115,22,0.6)]";
+    } else if (role === 'elite') {
+      colorClass = "bg-purple-600/90 text-white border border-purple-500 font-bold shadow-[0_0_15px_rgba(168,85,247,0.6)]";
+    } else {
+      colorClass = "bg-battle-gray/80 text-gray-400 border border-white/10";
+    }
+    return (
+      <span className={`px-2.5 py-0.5 text-[9px] font-cyber tracking-widest uppercase rounded ${colorClass}`}>
+        {displayName || role}
+      </span>
+    );
+  };
+
   // Dynamic roles loaded from the backend PlayerRole model
   const uniqueRoles = (roles || []).map(r => r.name);
 
@@ -145,6 +164,13 @@ export default function Roster({ onBack }: RosterProps) {
                   {/* Subtle dark gradient overlay at the bottom half */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300" />
                   
+                  {/* Clan Rank Badge in top left corner */}
+                  {player.clanRole && (
+                    <div className="absolute top-3 left-3 z-10">
+                      {getClanRoleBadge(player.clanRole, player.clanRoleDisplay)}
+                    </div>
+                  )}
+
                   {/* Level Badge in top right corner */}
                   <span className="absolute top-3 right-3 bg-pubg-orange/80 backdrop-blur-md text-battle-dark text-[10px] px-2 py-0.5 font-mono font-bold rounded z-10">
                     Lv.{player.level}
@@ -271,10 +297,13 @@ export default function Roster({ onBack }: RosterProps) {
                         <h3 className="font-oswald text-3xl font-black text-white tracking-widest">
                           {selectedPlayer.nickname}
                         </h3>
-                        <div className="flex gap-2 items-center mt-2">
+                        <div className="flex gap-2 items-center mt-2 flex-wrap">
                           <span className="bg-pubg-orange/20 px-2.5 py-1 text-[10px] text-pubg-orange font-cyber rounded tracking-widest uppercase border border-pubg-orange/30">
                             {selectedPlayer.role}
                           </span>
+                          {selectedPlayer.clanRole && (
+                            getClanRoleBadge(selectedPlayer.clanRole, selectedPlayer.clanRoleDisplay)
+                          )}
                           <span className="text-xs text-gray-400 font-mono">Level {selectedPlayer.level}</span>
                         </div>
                       </div>

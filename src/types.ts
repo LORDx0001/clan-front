@@ -3,6 +3,8 @@ export interface Player {
   nickname: string;
   uid?: string;
   role: string;
+  clanRole?: 'leader' | 'deputy' | 'elite' | 'member';
+  clanRoleDisplay?: string;
   device: string;
   kd?: number; // K/D Ratio
   level: number;
