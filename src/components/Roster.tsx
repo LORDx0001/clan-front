@@ -181,7 +181,7 @@ export default function Roster({ onBack }: RosterProps) {
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-[85vh] overflow-y-auto cursor-default"
+                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-none md:max-h-[85vh] md:overflow-y-auto cursor-default"
               >
                 {/* Tactical glowing corner designs */}
                 <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-pubg-orange z-10" />
