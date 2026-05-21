@@ -45,6 +45,7 @@ export default function Roster({ onBack }: RosterProps) {
     const files = [
       ...(player.profileMedia ? [player.profileMedia] : []),
       player.avatar,
+      ...(player.additionalMedia || []),
       ...playerHighlights.map(item => item.fileUrl)
     ];
     return Array.from(new Set(files)).filter(Boolean);
@@ -181,7 +182,7 @@ export default function Roster({ onBack }: RosterProps) {
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-none md:max-h-[85vh] md:overflow-y-auto cursor-default"
+                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-[90vh] overflow-y-auto cursor-default"
               >
                 {/* Tactical glowing corner designs */}
                 <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-pubg-orange z-10" />
@@ -296,6 +297,16 @@ export default function Roster({ onBack }: RosterProps) {
                           <span className="text-xs text-white font-cyber font-semibold">{selectedPlayer.region}</span>
                         </div>
                       </div>
+
+                      {/* Optional Player Biography Description */}
+                      {selectedPlayer.description && (
+                        <div className="space-y-1.5 pt-1">
+                          <h4 className="text-xs text-gray-400 font-mono uppercase">БИОГРАФИЯ / ОПИСАНИЕ:</h4>
+                          <div className="bg-battle-dark/50 border border-white/5 p-3 rounded text-xs text-gray-300 font-mono leading-relaxed max-h-[100px] overflow-y-auto whitespace-pre-wrap">
+                            {selectedPlayer.description}
+                          </div>
+                        </div>
+                      )}
 
                       {/* List of achievements */}
                       <div className="space-y-2 pt-1">

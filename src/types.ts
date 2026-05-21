@@ -11,6 +11,8 @@ export interface Player {
   achievements: string[];
   region: string;
   joinedDate: string;
+  description?: string;
+  additionalMedia?: string[];
 }
 
 export interface Announcement {
