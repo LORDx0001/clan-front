@@ -152,7 +152,7 @@ export default function Hero({ onTabChange }: HeroProps) {
               </div>
 
               {(settings.heroTitle1 || settings.heroTitle2) && (
-              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-oswald font-black leading-none tracking-tight uppercase">
+              <h1 className="text-3xl sm:text-7xl lg:text-8xl font-oswald font-black leading-none tracking-tight uppercase">
                 {settings.heroTitle1 && <><span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-500">{settings.heroTitle1}</span><br /></>}
                 {settings.heroTitle2 && <span className="relative inline-block text-pubg-orange animate-glitch-pulse">
                   {settings.heroTitle2}
@@ -162,15 +162,15 @@ export default function Hero({ onTabChange }: HeroProps) {
               )}
 
               {settings.heroDescription && (
-              <p className="text-gray-400 font-sans text-base sm:text-lg lg:text-xl max-w-2xl leading-relaxed">
+              <p className="text-gray-400 font-sans text-sm sm:text-lg lg:text-xl max-w-2xl leading-relaxed">
                 {settings.heroDescription}
               </p>
               )}
 
-              <div className="flex flex-wrap gap-4 pt-6">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <button 
                   onClick={() => onTabChange('rules')}
-                  className="relative px-8 py-4 bg-pubg-orange text-battle-dark font-oswald font-black text-lg tracking-widest uppercase rounded cursor-pointer transform hover:scale-105 active:scale-95 transition-all outline-hidden border border-pubg-orange shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.7)] group overflow-hidden"
+                  className="relative px-6 sm:px-8 py-3.5 sm:py-4 bg-pubg-orange text-battle-dark font-oswald font-black text-base sm:text-lg tracking-widest uppercase rounded cursor-pointer transform hover:scale-105 active:scale-95 transition-all outline-hidden border border-pubg-orange shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.7)] group overflow-hidden w-full sm:w-auto text-center"
                 >
                   <div className="absolute inset-0 w-1/4 h-full bg-white/25 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[400%] transition-transform duration-1000 ease-out" />
                   ПОДАТЬ ЗАЯВКУ
@@ -178,7 +178,7 @@ export default function Hero({ onTabChange }: HeroProps) {
 
                 <button 
                   onClick={() => onTabChange('roster')}
-                  className="px-8 py-4 bg-transparent hover:bg-white/5 text-white font-oswald font-medium text-lg tracking-widest uppercase rounded border-2 border-white/20 hover:border-pubg-orange/80 cursor-pointer transform hover:scale-102 active:scale-98 transition-all"
+                  className="px-6 sm:px-8 py-3.5 sm:py-4 bg-transparent hover:bg-white/5 text-white font-oswald font-medium text-base sm:text-lg tracking-widest uppercase rounded border-2 border-white/20 hover:border-pubg-orange/80 cursor-pointer transform hover:scale-102 active:scale-98 transition-all w-full sm:w-auto text-center"
                 >
                   СОСТАВ КЛАНА
                 </button>
@@ -386,68 +386,19 @@ export default function Hero({ onTabChange }: HeroProps) {
 
             <div className="lg:col-span-4 bg-battle-gray border border-gray-800 rounded-lg p-6 flex flex-col justify-between">
               <div className="space-y-4">
-                <span className="text-[10px] text-pubg-orange font-cyber tracking-widest block uppercase">// БЛИЖАЙШИЙ МАТЧ</span>
-                <h3 className="text-xl font-oswald font-black uppercase text-white">CIS CLAN PRO LEAGUE</h3>
+                <span className="text-[10px] text-pubg-orange font-cyber tracking-widest block uppercase">// НАБОР В КЛАН</span>
+                <h3 className="text-xl font-oswald font-black uppercase text-white">ВСТУПЛЕНИЕ В ОРГАНИЗАЦИЮ</h3>
                 <p className="text-xs text-gray-400 font-sans leading-relaxed">
-                  Будьте готовы! Наш про-сквад готовится к финальному матчу CIS League. На кону звание абсолютных чемпионов дивизиона.
+                  Ищете сильный и сыгранный сквад? Мы регулярно участвуем в престижных турнирах и проводим тренировки. Отправьте анкету в рекрутинге прямо сейчас!
                 </p>
               </div>
               <button 
-                onClick={() => onTabChange('schedule')}
+                onClick={() => onTabChange('rules')}
                 className="w-full bg-pubg-orange/10 hover:bg-pubg-orange/20 text-pubg-orange border border-pubg-orange/30 py-2 rounded text-xs font-cyber tracking-widest uppercase transition-all"
               >
-                Смотреть в расписании
+                Подать заявку
               </button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. SCHEDULE (РАСПИСАНИЕ) PREVIEW */}
-      <section className="py-16 bg-battle-gray border-t border-gray-900 px-2 sm:px-4 md:px-6">
-        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
-          <div className="flex justify-between items-end">
-            <div>
-              <span className="text-xs text-pubg-orange font-cyber tracking-widest uppercase block mb-1">ГРАФИК СРАЖЕНИЙ</span>
-              <h2 className="text-3xl sm:text-4xl font-oswald font-black uppercase">ТЕКУЩИЕ ОПЕРАЦИИ</h2>
-            </div>
-            <button 
-              onClick={() => onTabChange('schedule')}
-              className="group flex items-center gap-2 text-pubg-orange font-cyber text-xs uppercase tracking-widest border border-pubg-orange/30 px-3.5 py-2 rounded hover:bg-pubg-orange/15 transition-all"
-            >
-              <span>Показать всё расписание</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {schedule.slice(0, 2).map((event) => (
-              <div 
-                key={event.id}
-                onClick={() => onTabChange('schedule')}
-                className="bg-battle-dark border border-gray-800 rounded-lg p-5 flex items-center justify-between group hover:border-pubg-orange/50 transition-all duration-300 cursor-pointer"
-              >
-                <div className="space-y-2">
-                  <span className="text-[10px] bg-purple-900/40 text-purple-300 border border-purple-800/80 px-2 py-0.5 rounded font-cyber uppercase tracking-wider">
-                    {event.type}
-                  </span>
-                  <h3 className="font-oswald text-base font-bold text-white group-hover:text-pubg-orange transition-colors">
-                    {event.title}
-                  </h3>
-                  <div className="text-xs text-gray-500 font-mono">
-                    {event.opponent ? `Оппонент: ${event.opponent}` : "Внутренний сбор сквада"}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-cyber text-pubg-orange text-xs tracking-wider">
-                    {new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} UTC
-                  </div>
-                  <div className="text-[10px] text-gray-400 font-mono uppercase mt-1">
-                    {event.teamSize}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>

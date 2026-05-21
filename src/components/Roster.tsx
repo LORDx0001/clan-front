@@ -201,15 +201,16 @@ export default function Roster({ onBack }: RosterProps) {
           {selectedPlayer && (
             <div 
               onClick={() => setSelectedPlayer(null)}
-              className="fixed inset-0 z-[150] flex items-start justify-center p-4 pt-24 md:pt-28 pb-10 bg-battle-dark/95 backdrop-blur-md overflow-y-auto cursor-pointer"
+              className="fixed inset-0 z-[150] bg-battle-dark/95 backdrop-blur-md overflow-y-auto scroll-smooth cursor-pointer"
             >
-              <motion.div
-                onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-[90vh] overflow-y-auto cursor-default"
-              >
+              <div className="flex items-start justify-center min-h-screen py-8 px-2 sm:px-4">
+                <motion.div
+                  onClick={(e) => e.stopPropagation()}
+                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                  className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative cursor-default my-auto"
+                >
                 {/* Tactical glowing corner designs */}
                 <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-pubg-orange z-10" />
                 <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-pubg-orange z-10" />
@@ -399,7 +400,8 @@ export default function Roster({ onBack }: RosterProps) {
 
               </motion.div>
             </div>
-          )}
+          </div>
+        )}
         </AnimatePresence>
 
       </div>
