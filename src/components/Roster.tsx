@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Player } from '../types';
 import { useClan } from '../context/ClanContext';
-import { Shield, Sparkles, User, Crosshair, Award, Smartphone, Check, UserPlus, Trash, ChevronRight, Image, ArrowLeft } from 'lucide-react';
+import { Shield, Sparkles, User, Crosshair, Award, Smartphone, Check, UserPlus, Trash, ChevronRight, ChevronLeft, Image, ArrowLeft } from 'lucide-react';
 
 interface RosterProps {
   onBack?: () => void;
@@ -25,15 +25,12 @@ export default function Roster({ onBack }: RosterProps) {
     if (selectedPlayer) {
       setActiveModalMedia(selectedPlayer.profileMedia || selectedPlayer.avatar);
       document.body.classList.add('overflow-hidden');
-      document.documentElement.classList.add('overflow-hidden');
     } else {
       setActiveModalMedia(null);
       document.body.classList.remove('overflow-hidden');
-      document.documentElement.classList.remove('overflow-hidden');
     }
     return () => {
       document.body.classList.remove('overflow-hidden');
-      document.documentElement.classList.remove('overflow-hidden');
     };
   }, [selectedPlayer]);
 
@@ -225,7 +222,7 @@ export default function Roster({ onBack }: RosterProps) {
                 <div className="grid grid-cols-1 md:grid-cols-12">
                   {/* Left Column - media showcase & interactive gallery carousel */}
                   <div className="md:col-span-7 border-b md:border-b-0 md:border-r border-gray-800 bg-black/40 flex flex-col justify-between p-4 space-y-4">
-                    <div className="relative h-64 sm:h-80 w-full bg-black rounded-lg overflow-hidden border border-white/5 flex items-center justify-center">
+                    <div className="relative h-64 sm:h-80 w-full bg-black rounded-lg overflow-hidden border border-white/5 flex items-center justify-center group">
                       {(() => {
                         const mediaUrl = activeModalMedia || selectedPlayer.profileMedia || selectedPlayer.avatar;
                         const isVideo = mediaUrl?.toLowerCase().match(/\.(mp4|mov|webm)/) || mediaUrl?.toLowerCase().includes('mp4');
@@ -247,6 +244,49 @@ export default function Roster({ onBack }: RosterProps) {
                             className="w-full h-full object-contain"
                             referrerPolicy="no-referrer"
                           />
+                        );
+                      })()}
+
+                      {/* Left and Right navigation arrows */}
+                      {(() => {
+                        const allFiles = getPlayerMediaFiles(selectedPlayer);
+                        if (allFiles.length <= 1) return null;
+                        
+                        const currentIndex = allFiles.indexOf(activeModalMedia || '');
+                        
+                        return (
+                          <>
+                            {/* Left Arrow Button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const prevIndex = (currentIndex - 1 + allFiles.length) % allFiles.length;
+                                setActiveModalMedia(allFiles[prevIndex]);
+                              }}
+                              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-pubg-orange text-white hover:text-black border border-white/20 p-2 rounded-full z-20 cursor-pointer transition-all active:scale-90"
+                              title="Предыдущее медиа"
+                            >
+                              <ChevronLeft className="w-5 h-5" />
+                            </button>
+
+                            {/* Right Arrow Button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const nextIndex = (currentIndex + 1) % allFiles.length;
+                                setActiveModalMedia(allFiles[nextIndex]);
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-pubg-orange text-white hover:text-black border border-white/20 p-2 rounded-full z-20 cursor-pointer transition-all active:scale-90"
+                              title="Следующее медиа"
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+
+                            {/* Dynamic page indicator */}
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] text-gray-300 font-mono tracking-widest border border-white/10 select-none">
+                              {currentIndex !== -1 ? currentIndex + 1 : 1} / {allFiles.length}
+                            </div>
+                          </>
                         );
                       })()}
                     </div>
