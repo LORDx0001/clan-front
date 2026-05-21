@@ -44,7 +44,16 @@ interface ClanContextType {
 const ClanContext = createContext<ClanContextType | undefined>(undefined);
 
 export function ClanProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<ClanSettings>({
+  const loadCached = (key: string, defaultValue: any) => {
+    try {
+      const cached = localStorage.getItem(key);
+      return cached ? JSON.parse(cached) : defaultValue;
+    } catch (e) {
+      return defaultValue;
+    }
+  };
+
+  const [settings, setSettings] = useState<ClanSettings>(() => loadCached('clan_settings', {
     clanName: "",
     clanTag: "",
     clanFounded: "",
@@ -62,23 +71,29 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
     rulesTermsDesc: "",
     recruitmentImageUrl: "",
     rulesImageUrl: ""
-  });
+  }));
 
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [schedule, setSchedule] = useState<ScheduleEvent[]>([]);
-  const [rules, setRules] = useState<ClanRule[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-  const [roles, setRoles] = useState<PlayerRole[]>([]);
+  const [players, setPlayers] = useState<Player[]>(() => loadCached('clan_players', []));
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => loadCached('clan_announcements', []));
+  const [schedule, setSchedule] = useState<ScheduleEvent[]>(() => loadCached('clan_schedule', []));
+  const [rules, setRules] = useState<ClanRule[]>(() => loadCached('clan_rules', []));
+  const [gallery, setGallery] = useState<GalleryItem[]>(() => loadCached('clan_gallery', []));
+  const [roles, setRoles] = useState<PlayerRole[]>(() => loadCached('clan_roles', []));
   
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => {
+    // Only show loader if we have no cached settings
+    return !localStorage.getItem('clan_settings');
+  });
   const [error, setError] = useState<string | null>(null);
 
   // Fetch all live data from Django API on startup
   useEffect(() => {
     async function fetchAllData() {
       try {
-        setLoading(true);
+        // Only set loading to true if we don't have any cached settings to avoid jarring spinners
+        if (!localStorage.getItem('clan_settings')) {
+          setLoading(true);
+        }
         console.log("Fetching live settings from Django backend...");
         
         // 1. Settings
@@ -86,6 +101,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
           setSettings(settingsData);
+          localStorage.setItem('clan_settings', JSON.stringify(settingsData));
         }
 
         // 2. Players
@@ -93,6 +109,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (playersRes.ok) {
           const playersData = await playersRes.json();
           setPlayers(playersData);
+          localStorage.setItem('clan_players', JSON.stringify(playersData));
         }
 
         // 3. Announcements
@@ -100,6 +117,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (announcementsRes.ok) {
           const announcementsData = await announcementsRes.json();
           setAnnouncements(announcementsData);
+          localStorage.setItem('clan_announcements', JSON.stringify(announcementsData));
         }
 
         // 4. Schedule
@@ -107,6 +125,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (scheduleRes.ok) {
           const scheduleData = await scheduleRes.json();
           setSchedule(scheduleData);
+          localStorage.setItem('clan_schedule', JSON.stringify(scheduleData));
         }
 
         // 5. Rules
@@ -114,6 +133,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (rulesRes.ok) {
           const rulesData = await rulesRes.json();
           setRules(rulesData);
+          localStorage.setItem('clan_rules', JSON.stringify(rulesData));
         }
 
         // 6. Gallery
@@ -121,6 +141,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (galleryRes.ok) {
           const galleryData = await galleryRes.json();
           setGallery(galleryData);
+          localStorage.setItem('clan_gallery', JSON.stringify(galleryData));
         }
 
         // 7. Roles
@@ -128,6 +149,7 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
         if (rolesRes.ok) {
           const rolesData = await rolesRes.json();
           setRoles(rolesData);
+          localStorage.setItem('clan_roles', JSON.stringify(rolesData));
         }
 
         setError(null);

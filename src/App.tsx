@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Roster from './components/Roster';
@@ -8,8 +8,29 @@ import Gallery from './components/Gallery';
 import { useClan } from './context/ClanContext';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('main');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    // Check URL hash first (e.g. #roster)
+    const hash = window.location.hash.replace('#', '');
+    if (['main', 'roster', 'news', 'rules', 'gallery'].includes(hash)) {
+      return hash;
+    }
+    
+    // Fallback to localStorage
+    const cachedTab = localStorage.getItem('activeTab');
+    if (cachedTab && ['main', 'roster', 'news', 'rules', 'gallery'].includes(cachedTab)) {
+      return cachedTab;
+    }
+    
+    return 'main';
+  });
+
   const { settings, error } = useClan();
+
+  // Sync active tab to URL hash and localStorage on change
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+    window.location.hash = activeTab;
+  }, [activeTab]);
 
   const renderActiveComponent = () => {
     switch (activeTab) {
