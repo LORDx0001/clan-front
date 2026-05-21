@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Announcement } from '../types';
 import { useClan } from '../context/ClanContext';
-import { Eye, Clock, Calendar, User, Radio, ArrowRight, Share2, Plus, X, Globe, MessageSquare } from 'lucide-react';
+import { Eye, Clock, Calendar, User, Radio, ArrowRight, Share2, Plus, X, Globe, MessageSquare, ArrowLeft } from 'lucide-react';
 
-export default function NewsAnnouncements() {
+interface NewsProps {
+  onBack?: () => void;
+}
+
+export default function NewsAnnouncements({ onBack }: NewsProps) {
   const { announcements: contextAnnouncements, settings } = useClan();
   const [announcements, setAnnouncements] = useState<Announcement[]>(contextAnnouncements);
 
@@ -64,8 +68,20 @@ export default function NewsAnnouncements() {
 
   return (
     <div className="bg-battle-dark min-h-screen py-16 text-white px-2 sm:px-4 md:px-6">
-      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-12">
+      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
         
+        {onBack && (
+          <div className="flex justify-start">
+            <button 
+              onClick={onBack}
+              className="inline-flex items-center gap-2 text-[10px] font-cyber tracking-widest text-gray-400 hover:text-pubg-orange bg-battle-gray hover:bg-pubg-orange/10 px-4 py-2 rounded border border-white/5 hover:border-pubg-orange/30 transition-all duration-300 cursor-pointer group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              <span>НАЗАД НА ГЛАВНУЮ</span>
+            </button>
+          </div>
+        )}
+
         {/* Title Hub */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-3">
@@ -221,12 +237,16 @@ export default function NewsAnnouncements() {
         {/* Read News Full Expanded Lightbox Dialogue */}
         <AnimatePresence>
           {selectedNews && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-battle-dark/95 backdrop-blur-md">
+            <div 
+              onClick={() => setSelectedNews(null)}
+              className="fixed inset-0 z-[150] flex items-start justify-center p-4 pt-24 md:pt-28 pb-10 bg-battle-dark/95 backdrop-blur-md cursor-pointer overflow-y-auto"
+            >
               <motion.div
+                onClick={(e) => e.stopPropagation()}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-battle-gray border-2 border-pubg-orange/40 text-white w-full max-w-3xl rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(255,152,0,0.15)]"
+                className="bg-battle-gray border-2 border-pubg-orange/40 text-white w-full max-w-3xl rounded-lg overflow-hidden relative shadow-[0_0_30px_rgba(255,152,0,0.15)] max-h-[85vh] overflow-y-auto cursor-default"
               >
                 <button
                   onClick={() => setSelectedNews(null)}

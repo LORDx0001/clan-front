@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ClanRule, RecruitmentForm } from '../types';
 import { useClan } from '../context/ClanContext';
-import { Shield, FileText, CheckCircle2, ChevronDown, ChevronUp, Copy, Landmark, Sparkles, Terminal, BookOpen, Clock, Gamepad2, HeartCrack, Upload } from 'lucide-react';
+import { Shield, FileText, CheckCircle2, ChevronDown, ChevronUp, Copy, Landmark, Sparkles, Terminal, BookOpen, Clock, Gamepad2, HeartCrack, Upload, ArrowLeft } from 'lucide-react';
 
-export default function RulesRecruitment() {
+interface RulesProps {
+  onBack?: () => void;
+}
+
+export default function RulesRecruitment({ onBack }: RulesProps) {
   const { rules: contextRules, settings, submitRecruitment } = useClan();
   const [rules, setRules] = useState<ClanRule[]>(contextRules);
 
@@ -41,7 +45,7 @@ export default function RulesRecruitment() {
     const { name, value } = e.target;
     setRecruitmentForm(prev => ({
       ...prev,
-      [name]: name === 'age' || name === 'playTime' ? Number(value) : value
+      [name]: name === 'age' || name === 'playTime' ? (value === '' ? '' : Number(value)) : value
     }));
   };
 
@@ -63,9 +67,11 @@ export default function RulesRecruitment() {
     setScanProgress(0);
 
     // Dynamic assessment grade based on playTime & age!
-    if (recruitmentForm.playTime >= 6 && recruitmentForm.age >= 16) {
+    const finalPlayTime = Number(recruitmentForm.playTime) || 4;
+    const finalAge = Number(recruitmentForm.age) || 18;
+    if (finalPlayTime >= 6 && finalAge >= 16) {
       setAssessmentGrade('excellent');
-    } else if (recruitmentForm.age < 15) {
+    } else if (finalAge < 15) {
       setAssessmentGrade('unqualified');
     } else {
       setAssessmentGrade('accepted_with_test');
@@ -77,8 +83,8 @@ export default function RulesRecruitment() {
     formData.append('gameId', recruitmentForm.gameId);
     formData.append('role', recruitmentForm.role);
     formData.append('device', recruitmentForm.device);
-    formData.append('age', String(recruitmentForm.age));
-    formData.append('playTime', String(recruitmentForm.playTime));
+    formData.append('age', String(finalAge));
+    formData.append('playTime', String(finalPlayTime));
     formData.append('discordTelegram', recruitmentForm.discordTelegram);
     formData.append('about', recruitmentForm.about);
 
@@ -89,7 +95,13 @@ export default function RulesRecruitment() {
     if (statPhotos[3]) formData.append('stat_photo_4', statPhotos[3]);
 
     // Submit via ClanContext multipart action
-    await submitRecruitment(formData);
+    const res = await submitRecruitment(formData);
+    
+    if (res.error) {
+      alert(res.error);
+      setSimulationStep('idle');
+      return;
+    }
 
     const interval = setInterval(() => {
       setScanProgress(prev => {
@@ -144,10 +156,35 @@ export default function RulesRecruitment() {
 
   return (
     <div className="bg-battle-dark min-h-screen py-10 text-white px-2 sm:px-4 md:px-6 font-sans">
-      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-6">
+        
+        {onBack && (
+          <div className="flex justify-start">
+            <button 
+              onClick={onBack}
+              className="inline-flex items-center gap-2 text-[10px] font-cyber tracking-widest text-gray-400 hover:text-pubg-orange bg-battle-gray hover:bg-pubg-orange/10 px-4 py-2 rounded border border-white/5 hover:border-pubg-orange/30 transition-all duration-300 cursor-pointer group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              <span>НАЗАД НА ГЛАВНУЮ</span>
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         
         {/* Left Col: Accordion of Clan Rules (5 columns) */}
         <div className="lg:col-span-5 space-y-6">
+          {settings.rulesImageUrl && (
+            <div className="w-full h-44 rounded-lg overflow-hidden border border-pubg-orange/30 mb-6 bg-black relative">
+              <img 
+                src={settings.rulesImageUrl} 
+                alt="Rules Banner" 
+                className="w-full h-full object-cover opacity-85"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-battle-dark via-transparent to-black/10" />
+            </div>
+          )}
+
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 bg-pubg-orange/10 border border-pubg-orange/30 px-2.5 py-1 rounded text-[10px] font-cyber tracking-widest text-pubg-orange uppercase">
               <BookOpen className="w-3" /> Устав Организации
@@ -465,76 +502,42 @@ export default function RulesRecruitment() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="space-y-6"
+              className="flex flex-col items-center justify-center text-center py-12 px-4 space-y-6"
             >
-              <div className="flex items-center gap-3 border-b border-gray-800 pb-4">
-                <CheckCircle2 className="w-8 h-8 text-purple-400 shrink-0" />
-                <div>
-                  <h4 className="font-cyber text-lg font-black text-white uppercase tracking-wider">
-                    ИГРОВОЙ АНАЛИЗ ЗАВЕРШЕН SUCCESSFULLY
-                  </h4>
-                  <p className="text-gray-500 font-mono text-xs">КОД БИЛЕТА: INTER-RECRUIT-{Math.floor(Math.random() * 8999) + 1000}</p>
+              <div className="relative">
+                <div className="absolute inset-0 bg-cyber-green/20 rounded-full blur-xl animate-pulse" />
+                <div className="w-20 h-20 rounded-full border-4 border-cyber-green flex items-center justify-center relative z-10 bg-battle-dark">
+                  <CheckCircle2 className="w-12 h-12 text-cyber-green" />
                 </div>
               </div>
 
-              {/* Stat Grade Panels */}
-              {assessmentGrade === 'excellent' && (
-                <div className="bg-purple-900/25 border-2 border-pubg-orange p-4 rounded text-xs sm:text-sm space-y-2 text-purple-100">
-                  <span className="text-pubg-orange font-cyber font-black text-sm tracking-widest block">★ ВЫСОКИЙ ПРИОРИТЕТ АКТИВНОСТИ ({recruitmentForm.playTime} ч/день)</span>
-                  <p className="text-gray-300 font-sans leading-relaxed">
-                    Ваш показатель активности признан отличным для нашего сквада. Руководство Interstellar ставит вашу заявку в приоритетную очередь. Мы ждем вас в Discord для мгновенного собеседования и дуэлей!
-                  </p>
-                </div>
-              )}
-
-              {assessmentGrade === 'accepted_with_test' && (
-                <div className="bg-purple-900/10 border border-purple-800 p-4 rounded text-xs sm:text-sm space-y-2">
-                  <span className="text-purple-400 font-cyber font-black text-sm tracking-widest block">⚠ СТАНДАРТНЫЙ ПОКАЗАТЕЛЬ ({recruitmentForm.playTime} ч/день)</span>
-                  <p className="text-gray-300 font-sans leading-relaxed">
-                    Ваш уровень активности подходит под базовые критерии для прохождения селекции во Второй Склад или Академию. Вам необходимо пройти тестовую дуэль 1v1 с нашим экзаменатором на карте Warehouse.
-                  </p>
-                </div>
-              )}
-
-              {assessmentGrade === 'unqualified' && (
-                <div className="bg-red-950/20 border border-red-800 p-4 rounded text-xs sm:text-sm space-y-2">
-                  <span className="text-red-400 font-cyber font-black text-sm tracking-widest block">✕ ВОЗРАСТ ИЛИ ОПЫТ НИЖЕ ТРЕБУЕМОГО</span>
-                  <p className="text-gray-300 font-sans leading-relaxed">
-                    К сожалению, указанные показатели возраста ({recruitmentForm.age}) или ваш опыт не проходят по минимальному порогу киберспортивного звена. Мы внесем вашу анкету в базу резервистов. Продолжайте играть!
-                  </p>
-                </div>
-              )}
-
-              {/* Registration recap Ticket block */}
-              <div className="bg-battle-dark border border-gray-800 p-4 rounded font-mono text-xs space-y-2 relative">
-                <span className="text-[10px] text-gray-500 uppercase block tracking-wider">ГЕНЕРИРОВАННЫЙ БИЛЕТ РЕКРУТА:</span>
-                <pre className="text-gray-300 overflow-x-auto text-[11px] leading-relaxed whitespace-pre font-mono">
-                  {getFormTicketText()}
-                </pre>
-
-                <button
-                  onClick={copyTicketToClipboard}
-                  className="absolute top-4 right-4 bg-battle-light hover:bg-pubg-orange hover:text-battle-dark border border-white/10 px-3 py-1.5 rounded transition-all flex items-center gap-1.5 cursor-pointer text-[10px]"
-                >
-                  <Copy className="w-3.5" />
-                  <span>{ticketCopied ? 'СКОПИРОВАНО!' : 'КОПИРОВАТЬ TICKETS'}</span>
-                </button>
+              <div className="space-y-2">
+                <span className="text-[10px] text-cyber-green font-cyber tracking-widest uppercase block">
+                  SYSTEM STATUS: DELIVERED
+                </span>
+                <h3 className="text-3xl sm:text-4xl font-oswald font-black uppercase text-white tracking-wide">
+                  ЗАЯВКА УСПЕШНО <span className="text-cyber-green">ОТПРАВЛЕНА!</span>
+                </h3>
               </div>
 
-              {/* Instructions on how to clear this */}
-              <div className="space-y-2 text-xs text-gray-400 font-sans">
-                <p>
-                  <strong>Что делать дальше?</strong> Для ускорения отбора скопируйте данный билет выше и отправьте его нашему менеджеру в Telegram/Discord.
+              <div className="bg-battle-dark/50 border border-cyber-green/30 p-6 rounded-lg max-w-md shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                <p className="text-gray-200 font-oswald text-xl uppercase tracking-wider mb-2">
+                  Мы свяжемся с вами!
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSimulationStep('idle')}
-                    className="bg-transparent hover:bg-white/5 border border-white/10 px-4 py-2 rounded font-oswald text-xs uppercase cursor-pointer text-gray-200"
-                  >
-                    Заполнить анкету заново
-                  </button>
-                </div>
+                <p className="text-xs text-gray-400 font-sans leading-relaxed">
+                  Ваша анкета и скриншоты статистики были успешно зарегистрированы и отправлены руководству. Пожалуйста, держите контакты Discord/Telegram открытыми.
+                </p>
               </div>
+
+              <button
+                onClick={() => {
+                  setStatPhotos([null, null, null, null]);
+                  setSimulationStep('idle');
+                }}
+                className="bg-transparent hover:bg-cyber-green/10 border border-cyber-green/50 hover:border-cyber-green text-cyber-green font-oswald px-6 py-2.5 rounded text-xs uppercase cursor-pointer transition-all tracking-widest"
+              >
+                Заполнить анкету заново
+              </button>
             </motion.div>
           )}
 
@@ -542,5 +545,6 @@ export default function RulesRecruitment() {
 
       </div>
     </div>
+  </div>
   );
 }

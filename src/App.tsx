@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Roster from './components/Roster';
-import Schedule from './components/Schedule';
 import NewsAnnouncements from './components/NewsAnnouncements';
 import RulesRecruitment from './components/RulesRecruitment';
 import Gallery from './components/Gallery';
@@ -17,15 +16,13 @@ export default function App() {
       case 'main':
         return <Hero onTabChange={setActiveTab} />;
       case 'roster':
-        return <Roster />;
-      case 'schedule':
-        return <Schedule />;
+        return <Roster onBack={() => setActiveTab('main')} />;
       case 'news':
-        return <NewsAnnouncements />;
+        return <NewsAnnouncements onBack={() => setActiveTab('main')} />;
       case 'rules':
-        return <RulesRecruitment />;
+        return <RulesRecruitment onBack={() => setActiveTab('main')} />;
       case 'gallery':
-        return <Gallery />;
+        return <Gallery onBack={() => setActiveTab('main')} />;
       default:
         return <Hero onTabChange={setActiveTab} />;
     }
@@ -54,8 +51,8 @@ export default function App() {
       </main>
 
       {/* Universal Tactical Footer Section */}
-      <footer className="relative z-20 bg-battle-dark/95 border-t-2 border-pubg-orange/15 py-12 px-4 sm:px-6 lg:px-8 mt-auto">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-800">
+      <footer className="relative z-20 bg-battle-dark/95 border-t-2 border-pubg-orange/15 py-12 px-2 sm:px-4 md:px-6 mt-auto">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-800">
           
           {/* Brand Col */}
           <div className="space-y-4">
@@ -85,7 +82,6 @@ export default function App() {
               <button onClick={() => setActiveTab('roster')} className="text-left hover:text-pubg-orange transition-colors">СОСТАВ</button>
               <button onClick={() => setActiveTab('gallery')} className="text-left hover:text-pubg-orange transition-colors">ГАЛЕРЕЯ</button>
               <button onClick={() => setActiveTab('news')} className="text-left hover:text-pubg-orange transition-colors">НОВОСТИ</button>
-              <button onClick={() => setActiveTab('schedule')} className="text-left hover:text-pubg-orange transition-colors">РАСПИСАНИЕ</button>
               <button onClick={() => setActiveTab('rules')} className="text-left hover:text-pubg-orange transition-colors">РЕКРУТИНГ</button>
             </div>
           </div>
@@ -110,7 +106,7 @@ export default function App() {
         </div>
 
         {/* Copyright block */}
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600 font-mono">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600 font-mono">
           <div>
             © {new Date().getFullYear()} {(settings.clanName || "CLAN").toUpperCase()} SYSTEMS ESPORTS. ALL RIGHTS RESERVED.
           </div>

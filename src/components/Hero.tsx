@@ -115,7 +115,7 @@ export default function Hero({ onTabChange }: HeroProps) {
           </div>
         )}
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24 flex flex-col justify-between min-h-[calc(100vh-80px)] w-full">
+        <div className="relative z-10 max-w-[96%] lg:max-w-[1550px] mx-auto px-2 sm:px-4 md:px-6 py-12 md:py-24 flex flex-col justify-between min-h-[calc(100vh-80px)] w-full">
           
           <div className="flex flex-wrap items-center gap-4 mt-2">
             <div className="bg-pubg-orange text-battle-dark font-cyber font-black text-xs px-3 py-1 tracking-widest uppercase skewed-badge">
@@ -207,8 +207,8 @@ export default function Hero({ onTabChange }: HeroProps) {
       </section>
 
       {/* 2. ROSTER (СОСТАВ) PREVIEW */}
-      <section className="py-16 bg-battle-dark border-t border-gray-900 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <section className="py-16 bg-battle-dark border-t border-gray-900 px-2 sm:px-4 md:px-6">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <span className="text-xs text-pubg-orange font-cyber tracking-widest uppercase block mb-1">ОПЕРАТИВНИКИ_ИНФО</span>
@@ -265,8 +265,8 @@ export default function Hero({ onTabChange }: HeroProps) {
       </section>
 
       {/* 3. GALLERY (ГАЛЕРЕЯ) PREVIEW */}
-      <section className="py-16 bg-battle-gray border-t border-gray-900 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <section className="py-16 bg-battle-gray border-t border-gray-900 px-2 sm:px-4 md:px-6">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <span className="text-xs text-pubg-orange font-cyber tracking-widest uppercase block mb-1">МЕДИАТЕКА CLAN.iso</span>
@@ -316,8 +316,8 @@ export default function Hero({ onTabChange }: HeroProps) {
       </section>
 
       {/* 4. NEWS (НОВОСТИ) PREVIEW */}
-      <section className="py-16 bg-battle-dark border-t border-gray-900 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <section className="py-16 bg-battle-dark border-t border-gray-900 px-2 sm:px-4 md:px-6">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <span className="text-xs text-pubg-orange font-cyber tracking-widest uppercase block mb-1">СВЕЖИЕ СВОДКИ</span>
@@ -392,8 +392,8 @@ export default function Hero({ onTabChange }: HeroProps) {
       </section>
 
       {/* 5. SCHEDULE (РАСПИСАНИЕ) PREVIEW */}
-      <section className="py-16 bg-battle-gray border-t border-gray-900 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <section className="py-16 bg-battle-gray border-t border-gray-900 px-2 sm:px-4 md:px-6">
+        <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <span className="text-xs text-pubg-orange font-cyber tracking-widest uppercase block mb-1">ГРАФИК СРАЖЕНИЙ</span>

@@ -21,6 +21,7 @@ export interface ClanSettings {
   stats: Array<{ title: string; value: string; desc: string }>;
   rulesTermsDesc: string;
   recruitmentImageUrl?: string;
+  rulesImageUrl?: string;
 }
 
 interface ClanContextType {
@@ -58,7 +59,8 @@ export function ClanProvider({ children }: { children: React.ReactNode }) {
       { title: "", value: "", desc: "" }
     ],
     rulesTermsDesc: "",
-    recruitmentImageUrl: ""
+    recruitmentImageUrl: "",
+    rulesImageUrl: ""
   });
 
   const [players, setPlayers] = useState<Player[]>([]);

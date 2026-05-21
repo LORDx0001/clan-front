@@ -28,7 +28,6 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
     { id: 'roster', label: 'СОСТАВ' },
     { id: 'gallery', label: 'ГАЛЕРЕЯ' },
     { id: 'news', label: 'НОВОСТИ' },
-    { id: 'schedule', label: 'РАСПИСАНИЕ' },
     { id: 'rules', label: 'ПРАВИЛА И РЕКРУТИНГ' },
   ];
 
@@ -56,8 +55,8 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-battle-dark/95 border-b-2 border-pubg-orange/20 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 bg-battle-dark/95 border-b-2 border-pubg-orange/20 backdrop-blur-md px-2 sm:px-4 md:px-6">
+      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto">
         <div className="flex items-center justify-between h-20">
           
           {/* Logo / Clan Branding */}

@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Player } from '../types';
 import { useClan } from '../context/ClanContext';
-import { Shield, Sparkles, User, Crosshair, Award, Smartphone, Check, UserPlus, Trash, ChevronRight, Image } from 'lucide-react';
+import { Shield, Sparkles, User, Crosshair, Award, Smartphone, Check, UserPlus, Trash, ChevronRight, Image, ArrowLeft } from 'lucide-react';
 
-export default function Roster() {
+interface RosterProps {
+  onBack?: () => void;
+}
+
+export default function Roster({ onBack }: RosterProps) {
   const { players: contextPlayers, settings, gallery } = useClan();
   const [players, setPlayers] = useState<Player[]>(contextPlayers);
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [activeModalMedia, setActiveModalMedia] = useState<string | null>(null);
 
   useEffect(() => {
     if (contextPlayers) {
@@ -18,9 +23,11 @@ export default function Roster() {
 
   useEffect(() => {
     if (selectedPlayer) {
+      setActiveModalMedia(selectedPlayer.profileMedia || selectedPlayer.avatar);
       document.body.classList.add('overflow-hidden');
       document.documentElement.classList.add('overflow-hidden');
     } else {
+      setActiveModalMedia(null);
       document.body.classList.remove('overflow-hidden');
       document.documentElement.classList.remove('overflow-hidden');
     }
@@ -29,6 +36,19 @@ export default function Roster() {
       document.documentElement.classList.remove('overflow-hidden');
     };
   }, [selectedPlayer]);
+
+  // Gather all unique media files (avatar, profile media, and tagged gallery photos/videos)
+  const getPlayerMediaFiles = (player: Player) => {
+    const playerHighlights = (gallery || []).filter(item => 
+      item.taggedPlayers?.some((p: any) => String(p.id) === String(player.id) || p.nickname === player.nickname)
+    );
+    const files = [
+      ...(player.profileMedia ? [player.profileMedia] : []),
+      player.avatar,
+      ...playerHighlights.map(item => item.fileUrl)
+    ];
+    return Array.from(new Set(files)).filter(Boolean);
+  };
 
   // Extract unique roles dynamically from the actual players loaded from DB!
   const uniqueRoles = Array.from(new Set(players.map(p => p.role).filter(Boolean)));
@@ -40,8 +60,20 @@ export default function Roster() {
 
   return (
     <div className="bg-battle-dark min-h-screen py-10 text-white px-2 sm:px-4 md:px-6">
-      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-12">
+      <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
         
+        {onBack && (
+          <div className="flex justify-start">
+            <button 
+              onClick={onBack}
+              className="inline-flex items-center gap-2 text-[10px] font-cyber tracking-widest text-gray-400 hover:text-pubg-orange bg-battle-gray hover:bg-pubg-orange/10 px-4 py-2 rounded border border-white/5 hover:border-pubg-orange/30 transition-all duration-300 cursor-pointer group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              <span>НАЗАД НА ГЛАВНУЮ</span>
+            </button>
+          </div>
+        )}
+
         {/* Title Hub */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-pubg-orange/15 px-3 py-1 rounded text-xs font-cyber tracking-widest text-pubg-orange uppercase">
@@ -91,15 +123,6 @@ export default function Roster() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
             {filteredPlayers.map((player) => {
-              const roleColors = {
-                'Leader': 'border-cyber-yellow text-cyber-yellow',
-                'Assaulter': 'border-cyber-red text-cyber-red',
-                'Sniper': 'border-cyan-400 text-cyan-400',
-                'Scout': 'border-purple-400 text-purple-400',
-                'Support': 'border-cyber-green text-cyber-green',
-                'Manager': 'border-pink-400 text-pink-400'
-              };
-
               return (
                 <motion.div
                   key={player.id}
@@ -109,69 +132,36 @@ export default function Roster() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(168, 85, 247, 0.15)' }}
                   onClick={() => setSelectedPlayer(player)}
-                  className="bg-battle-gray border-2 border-gray-800 rounded-lg cursor-pointer relative group transition-all duration-300 overflow-hidden"
+                  className="bg-battle-gray border border-gray-800 rounded-lg cursor-pointer relative group transition-all duration-300 overflow-hidden aspect-[3/4]"
                 >
-                  {/* Real Game Profile Screenshot Banner */}
-                  <div className="relative h-48 w-full overflow-hidden border-b border-gray-800">
-                    <img 
-                      src={player.avatar} 
-                      alt={`${player.nickname} Game Screenshot`} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-battle-gray via-transparent to-black/25" />
-                    <span className="absolute bottom-2.5 left-3.5 bg-black/75 border border-pubg-orange/30 text-[9px] px-2 py-0.5 font-mono text-pubg-orange font-bold uppercase tracking-wider rounded">
-                      СКРИНШОТ ПРОФИЛЯ
-                    </span>
-                    <span className="absolute top-3 right-3 bg-pubg-orange text-battle-dark text-[10px] px-2 py-0.5 font-mono font-bold rounded">
-                      Lv.{player.level}
-                    </span>
-                  </div>
+                  {/* Portrait photo backdrop */}
+                  <img 
+                    src={player.avatar} 
+                    alt={`${player.nickname}`} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                  {/* Subtle dark gradient overlay at the bottom half */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300" />
+                  
+                  {/* Level Badge in top right corner */}
+                  <span className="absolute top-3 right-3 bg-pubg-orange/80 backdrop-blur-md text-battle-dark text-[10px] px-2 py-0.5 font-mono font-bold rounded z-10">
+                    Lv.{player.level}
+                  </span>
 
-                  {/* Body Info */}
-                  <div className="p-5 space-y-3.5">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-oswald text-xl font-bold tracking-wider text-white group-hover:text-pubg-orange transition-colors">
-                          {player.nickname}
-                        </h3>
-                        <span className={`text-[10px] font-cyber tracking-widest uppercase border px-2 py-0.5 rounded inline-block mt-1 ${roleColors[player.role]}`}>
-                          {player.role}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="space-y-2 text-sm border-t border-gray-850 pt-3">
-                      <div className="flex justify-between text-xs text-gray-400 font-sans">
-                        <span className="flex items-center gap-1 font-mono uppercase text-[10px]"><Smartphone className="w-3" /> УСТРОЙСТВО</span>
-                        <strong className="text-white">{player.device}</strong>
-                      </div>
-
-                      <div className="flex justify-between text-xs text-gray-400 font-sans">
-                        <span className="flex items-center gap-1 font-mono uppercase text-[10px]"><Crosshair className="w-3" /> ОРУЖИЕ</span>
-                        <strong className="text-white">{player.signatureWeapon}</strong>
-                      </div>
-                    </div>
-
-                    {/* Achievements Preview */}
-                    {player.achievements.length > 0 && (
-                      <div className="bg-battle-dark/50 border border-white/5 rounded p-2.5">
-                        <div className="text-[9px] text-pubg-orange font-cyber tracking-widest uppercase mb-1 flex items-center gap-1">
-                          <Award className="w-3 h-3 text-pubg-orange" /> ГЛАВНЫЙ ОПЫТ
-                        </div>
-                        <p className="text-xs text-gray-300 font-sans line-clamp-1 italic">
-                          "{player.achievements[0]}"
-                        </p>
-                      </div>
+                  {/* Left bottom corner info overlay */}
+                  <div className="absolute bottom-4 left-4 right-4 z-10 space-y-1">
+                    <h3 className="font-oswald text-2xl font-black uppercase tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md">
+                      {player.nickname}
+                    </h3>
+                    {player.achievements && player.achievements.length > 0 && player.achievements[0] && (
+                      <p className="text-xs text-gray-300 font-sans line-clamp-2 leading-relaxed drop-shadow-sm">
+                        {player.achievements[0]}
+                      </p>
                     )}
-
-                    <div className="flex items-center justify-between mt-3 text-[10px] text-gray-500 font-mono uppercase border-t border-gray-850 pt-2.5">
-                      <span>{player.region}</span>
-                      <span className="text-pubg-orange hover:text-white transition-colors flex items-center gap-0.5">
-                        ПОДРОБНЕЕ <ChevronRight className="w-3" />
-                      </span>
-                    </div>
+                    <span className="text-[9px] font-cyber tracking-widest text-pubg-orange uppercase block pt-1">
+                      // {player.role}
+                    </span>
                   </div>
                 </motion.div>
               );
@@ -182,12 +172,16 @@ export default function Roster() {
         {/* Detailed Stats Lightbox Modal of Selected Player */}
         <AnimatePresence>
           {selectedPlayer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-battle-dark/95 backdrop-blur-md overflow-y-auto">
+            <div 
+              onClick={() => setSelectedPlayer(null)}
+              className="fixed inset-0 z-[150] flex items-start justify-center p-4 pt-24 md:pt-28 pb-10 bg-battle-dark/95 backdrop-blur-md overflow-y-auto cursor-pointer"
+            >
               <motion.div
+                onClick={(e) => e.stopPropagation()}
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-[92vh] overflow-y-auto"
+                className="bg-battle-gray border-2 border-pubg-orange text-white w-full max-w-3xl rounded-lg overflow-hidden relative max-h-[85vh] overflow-y-auto cursor-default"
               >
                 {/* Tactical glowing corner designs */}
                 <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-pubg-orange z-10" />
@@ -201,27 +195,70 @@ export default function Roster() {
                 </button>
 
                 <div className="grid grid-cols-1 md:grid-cols-12">
-                  {/* Left Column - screenshot showcase */}
-                  <div className="md:col-span-7 relative h-64 md:h-auto min-h-[300px] border-b md:border-b-0 md:border-r border-gray-800 bg-black flex items-center justify-center">
-                    {(() => {
-                      const mediaUrl = selectedPlayer.profileMedia || selectedPlayer.avatar;
-                      const isVideo = mediaUrl?.toLowerCase().match(/\.(mp4|mov|webm)/) || mediaUrl?.toLowerCase().includes('mp4');
-                      if (isVideo) {
+                  {/* Left Column - media showcase & interactive gallery carousel */}
+                  <div className="md:col-span-7 border-b md:border-b-0 md:border-r border-gray-800 bg-black/40 flex flex-col justify-between p-4 space-y-4">
+                    <div className="relative h-64 sm:h-80 w-full bg-black rounded-lg overflow-hidden border border-white/5 flex items-center justify-center">
+                      {(() => {
+                        const mediaUrl = activeModalMedia || selectedPlayer.profileMedia || selectedPlayer.avatar;
+                        const isVideo = mediaUrl?.toLowerCase().match(/\.(mp4|mov|webm)/) || mediaUrl?.toLowerCase().includes('mp4');
+                        if (isVideo) {
+                          return (
+                            <video 
+                              key={mediaUrl}
+                              src={mediaUrl} 
+                              autoPlay loop controls
+                              className="w-full h-full object-contain"
+                            />
+                          );
+                        }
                         return (
-                          <video 
+                          <img 
+                            key={mediaUrl}
                             src={mediaUrl} 
-                            autoPlay loop controls
-                            className="w-full h-full object-cover"
+                            alt={`${selectedPlayer.nickname} Showcase`} 
+                            className="w-full h-full object-contain"
+                            referrerPolicy="no-referrer"
                           />
                         );
-                      }
+                      })()}
+                    </div>
+
+                    {/* Horizontal slider of other media files */}
+                    {(() => {
+                      const allFiles = getPlayerMediaFiles(selectedPlayer);
+                      if (allFiles.length <= 1) return null;
                       return (
-                        <img 
-                          src={mediaUrl} 
-                          alt={`${selectedPlayer.nickname} Full Game Profile`} 
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider block">
+                            МЕДИАТЕКА ИГРОКА ({allFiles.length} ФАЙЛОВ)
+                          </span>
+                          <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-pubg-orange">
+                            {allFiles.map((fileUrl, index) => {
+                              const isActive = activeModalMedia === fileUrl;
+                              const isVid = fileUrl.toLowerCase().match(/\.(mp4|mov|webm)/) || fileUrl.toLowerCase().includes('mp4');
+                              return (
+                                <button
+                                  key={index}
+                                  onClick={() => setActiveModalMedia(fileUrl)}
+                                  className={`relative w-20 h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-all cursor-pointer ${
+                                    isActive ? 'border-pubg-orange scale-95 shadow-[0_0_10px_rgba(255,152,0,0.5)]' : 'border-gray-800 opacity-60 hover:opacity-100'
+                                  }`}
+                                >
+                                  {isVid ? (
+                                    <div className="w-full h-full bg-battle-gray flex items-center justify-center relative">
+                                      <video src={fileUrl} className="w-full h-full object-cover pointer-events-none" />
+                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <span className="text-[8px] bg-pubg-orange text-battle-dark px-1 py-0.5 rounded font-cyber font-bold">VIDEO</span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <img src={fileUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })()}
                   </div>
