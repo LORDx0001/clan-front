@@ -284,6 +284,12 @@ export default function Roster({ onBack }: RosterProps) {
                       </h4>
 
                       <div className="space-y-3 pt-1">
+                        {selectedPlayer.uid && (
+                          <div className="bg-battle-dark/40 border border-white/5 p-3 rounded flex items-center justify-between">
+                            <span className="text-xs text-gray-400 font-mono uppercase">ИГРОВОЙ UID</span>
+                            <span className="text-xs text-white font-cyber font-semibold tracking-wider">{selectedPlayer.uid}</span>
+                          </div>
+                        )}
                         <div className="bg-battle-dark/40 border border-white/5 p-3 rounded flex items-center justify-between">
                           <span className="text-xs text-gray-400 font-mono uppercase">ОСНОВНОЙ ДЕВАЙС</span>
                           <span className="text-xs text-white font-cyber font-semibold">{selectedPlayer.device}</span>

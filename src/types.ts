@@ -1,6 +1,7 @@
 export interface Player {
   id: string;
   nickname: string;
+  uid?: string;
   role: string;
   device: string;
   kd?: number; // K/D Ratio
