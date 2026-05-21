@@ -170,7 +170,7 @@ export default function RulesRecruitment({ onBack }: RulesProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
         {/* Left Col: Accordion of Clan Rules (5 columns) */}
         <div className="lg:col-span-5 space-y-6">
