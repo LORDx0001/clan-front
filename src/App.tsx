@@ -24,13 +24,54 @@ export default function App() {
     return 'main';
   });
 
-  const { settings, error } = useClan();
+  const { settings, error, loading } = useClan();
 
   // Sync active tab to URL hash and localStorage on change
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
     window.location.hash = activeTab;
   }, [activeTab]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-100 bg-battle-dark flex flex-col items-center justify-center text-white overflow-hidden select-none font-mono">
+        {/* Futuristic tech grids */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.08)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.02)_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+        
+        {/* Rotating tech circle */}
+        <div className="relative w-24 h-24 flex items-center justify-center">
+          <div className="absolute w-24 h-24 border-2 border-dashed border-pubg-orange/40 rounded-full animate-[spin_10s_linear_infinite]" />
+          <div className="absolute w-20 h-20 border-2 border-double border-pubg-orange/20 rounded-full animate-[spin_6s_linear_infinite_reverse]" />
+          <div className="absolute w-12 h-12 border border-pubg-orange/10 rounded-full animate-ping" />
+          
+          {/* Target crosshair center dot */}
+          <div className="w-4 h-4 bg-pubg-orange rounded-full shadow-[0_0_15px_rgba(168,85,247,0.8)] animate-pulse flex items-center justify-center">
+            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+          </div>
+        </div>
+
+        {/* Loading text with tech scanners */}
+        <div className="mt-8 space-y-3 text-center z-10">
+          <h2 className="text-sm font-cyber uppercase tracking-[0.3em] text-pubg-orange animate-pulse">
+            Инициализация систем клана...
+          </h2>
+          
+          {/* Faux tech console logging */}
+          <div className="text-[9px] text-gray-500 font-mono tracking-wider h-4 overflow-hidden max-w-xs mx-auto uppercase">
+            <span className="animate-[pulse_1s_infinite]">
+              // Подключение к защищенной базе данных...
+            </span>
+          </div>
+
+          {/* Glowing loading track */}
+          <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden border border-white/10 relative mx-auto">
+            <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-purple-600 to-pubg-orange rounded-full animate-loading-bar shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderActiveComponent = () => {
     switch (activeTab) {

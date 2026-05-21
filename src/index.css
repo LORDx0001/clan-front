@@ -19,6 +19,7 @@
   --animate-glitch-pulse: glitch-pulse 3s infinite alternate;
   --animate-neon-glow: neon-glow 2s ease-in-out infinite alternate;
   --animate-shake: shake 0.5s ease-in-out infinite;
+  --animate-loading-bar: loading-bar 1.5s ease-in-out infinite;
 
   @keyframes scanline {
     0% { transform: translateY(-100%); }
@@ -39,6 +40,11 @@
     50% { transform: translate(-1px, 1px); }
     70% { transform: translate(1px, -1px); }
     90% { transform: translate(-1px, -1px); }
+  }
+  @keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(20%); }
+    100% { transform: translateX(100%); }
   }
 }
 
