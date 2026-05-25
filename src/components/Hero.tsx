@@ -95,7 +95,9 @@ export default function Hero({ onTabChange }: HeroProps) {
                         autoPlay muted playsInline
                         loop={false}
                         onEnded={goToNextSlide}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        controlsList="nodownload"
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                       />
                     ) : (
                       <div

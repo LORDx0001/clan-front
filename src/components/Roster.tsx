@@ -232,6 +232,8 @@ export default function Roster({ onBack }: RosterProps) {
                               key={mediaUrl}
                               src={mediaUrl} 
                               autoPlay loop controls
+                              controlsList="nodownload"
+                              onContextMenu={(e) => e.preventDefault()}
                               className="w-full h-full object-contain"
                             />
                           );
