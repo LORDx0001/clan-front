@@ -50,6 +50,25 @@ export default function Hero({ onTabChange }: HeroProps) {
     return () => clearInterval(interval);
   }, []);
 
+  const getClanRoleBadge = (role?: string, displayName?: string) => {
+    if (!role) return null;
+    let colorClass = "";
+    if (role === 'leader') {
+      colorClass = "bg-yellow-500/90 text-black border border-yellow-400 font-bold shadow-[0_0_15px_rgba(234,179,8,0.6)]";
+    } else if (role === 'deputy') {
+      colorClass = "bg-orange-600/90 text-white border border-orange-500 font-bold shadow-[0_0_15px_rgba(249,115,22,0.6)]";
+    } else if (role === 'elite') {
+      colorClass = "bg-purple-600/90 text-white border border-purple-500 font-bold shadow-[0_0_15px_rgba(168,85,247,0.6)]";
+    } else {
+      colorClass = "bg-battle-gray/80 text-gray-400 border border-white/10";
+    }
+    return (
+      <span className={`px-2.5 py-0.5 text-[9px] font-cyber tracking-widest uppercase rounded ${colorClass}`}>
+        {displayName || role}
+      </span>
+    );
+  };
+
   return (
     <div className="w-full">
       
@@ -235,42 +254,52 @@ export default function Hero({ onTabChange }: HeroProps) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {players.slice(0, 3).map((player) => (
-              <div 
+          {/* Roster cards preview - 4 compact cards matching the beautiful roster styles */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {players.slice(0, 4).map((player) => (
+              <motion.div
                 key={player.id}
                 onClick={() => onTabChange('roster')}
-                className="bg-battle-gray border border-gray-800 rounded-lg overflow-hidden group hover:border-pubg-orange/50 transition-all duration-300 cursor-pointer"
+                whileHover={{ y: -5, boxShadow: '0 10px 30px rgba(168, 85, 247, 0.15)' }}
+                className="bg-battle-gray border border-gray-800 rounded-lg cursor-pointer relative group transition-all duration-300 overflow-hidden aspect-[3/4]"
               >
-                <div className="h-40 w-full overflow-hidden relative">
-                  <img 
-                    src={player.avatar} 
-                    alt={player.nickname} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-battle-gray via-transparent to-black/10" />
-                  <span className="absolute bottom-2 left-3 bg-black/75 border border-pubg-orange/30 text-[9px] px-2 py-0.5 font-mono text-pubg-orange font-bold uppercase rounded">
-                    СКРИНШОТ ПРОФИЛЯ
-                  </span>
-                  <span className="absolute top-2.5 right-2.5 bg-pubg-orange text-battle-dark text-[10px] px-1.5 font-mono font-bold rounded">
-                    Lv.{player.level}
-                  </span>
-                </div>
-                <div className="p-4 space-y-2">
-                  <h3 className="font-oswald text-lg font-bold text-white group-hover:text-pubg-orange transition-colors">
+                {/* Portrait photo backdrop */}
+                <img 
+                  src={player.avatar} 
+                  alt={player.nickname} 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                {/* Subtle dark gradient overlay at the bottom half */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300" />
+                
+                {/* Clan Rank Badge in top left corner */}
+                {player.clanRole && (
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 scale-90 sm:scale-100 origin-top-left">
+                    {getClanRoleBadge(player.clanRole, player.clanRoleDisplay)}
+                  </div>
+                )}
+
+                {/* Level Badge in top right corner */}
+                <span className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-pubg-orange/80 backdrop-blur-md text-battle-dark text-[8px] sm:text-[10px] px-1.5 py-0.5 sm:px-2 sm:py-0.5 font-mono font-bold rounded z-10">
+                  Lv.{player.level}
+                </span>
+
+                {/* Left bottom corner info overlay */}
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 z-10 space-y-0.5 sm:space-y-1">
+                  <h3 className="font-oswald text-sm sm:text-lg md:text-2xl font-black uppercase tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md line-clamp-1">
                     {player.nickname}
                   </h3>
-                  <div className="flex justify-between text-xs text-gray-400 font-mono">
-                    <span>УСТРОЙСТВО:</span>
-                    <span className="text-white font-semibold">{player.device}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-400 font-mono">
-                    <span>ОРУЖИЕ:</span>
-                    <span className="text-white font-semibold">{player.signatureWeapon}</span>
-                  </div>
+                  {player.achievements && player.achievements.length > 0 && player.achievements[0] && (
+                    <p className="text-[10px] sm:text-xs text-gray-300 font-sans line-clamp-1 leading-relaxed drop-shadow-sm">
+                      {player.achievements[0]}
+                    </p>
+                  )}
+                  <span className="text-[8px] sm:text-[9px] font-cyber tracking-widest text-pubg-orange uppercase block pt-0.5 sm:pt-1">
+                    // {player.role}
+                  </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
