@@ -136,8 +136,8 @@ export default function Roster({ onBack }: RosterProps) {
           </div>
         </div>
 
-        {/* Grid Players Display */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid Players Display - 2 columns on mobile, beautifully scaling to 3 and 4 columns on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           <AnimatePresence>
             {filteredPlayers.map((player) => {
               return (
@@ -163,27 +163,27 @@ export default function Roster({ onBack }: RosterProps) {
                   
                   {/* Clan Rank Badge in top left corner */}
                   {player.clanRole && (
-                    <div className="absolute top-3 left-3 z-10">
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 scale-90 sm:scale-100 origin-top-left">
                       {getClanRoleBadge(player.clanRole, player.clanRoleDisplay)}
                     </div>
                   )}
 
                   {/* Level Badge in top right corner */}
-                  <span className="absolute top-3 right-3 bg-pubg-orange/80 backdrop-blur-md text-battle-dark text-[10px] px-2 py-0.5 font-mono font-bold rounded z-10">
+                  <span className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-pubg-orange/80 backdrop-blur-md text-battle-dark text-[8px] sm:text-[10px] px-1.5 py-0.5 sm:px-2 sm:py-0.5 font-mono font-bold rounded z-10">
                     Lv.{player.level}
                   </span>
 
                   {/* Left bottom corner info overlay */}
-                  <div className="absolute bottom-4 left-4 right-4 z-10 space-y-1">
-                    <h3 className="font-oswald text-2xl font-black uppercase tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md">
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 z-10 space-y-0.5 sm:space-y-1">
+                    <h3 className="font-oswald text-sm sm:text-lg md:text-2xl font-black uppercase tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md line-clamp-1">
                       {player.nickname}
                     </h3>
                     {player.achievements && player.achievements.length > 0 && player.achievements[0] && (
-                      <p className="text-xs text-gray-300 font-sans line-clamp-2 leading-relaxed drop-shadow-sm">
+                      <p className="text-[10px] sm:text-xs text-gray-300 font-sans line-clamp-1 leading-relaxed drop-shadow-sm">
                         {player.achievements[0]}
                       </p>
                     )}
-                    <span className="text-[9px] font-cyber tracking-widest text-pubg-orange uppercase block pt-1">
+                    <span className="text-[8px] sm:text-[9px] font-cyber tracking-widest text-pubg-orange uppercase block pt-0.5 sm:pt-1">
                       // {player.role}
                     </span>
                   </div>
