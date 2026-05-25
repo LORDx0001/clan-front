@@ -175,7 +175,7 @@ export default function Roster({ onBack }: RosterProps) {
 
                   {/* Left bottom corner info overlay */}
                   <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 z-10 space-y-0.5 sm:space-y-1">
-                    <h3 className="font-oswald text-sm sm:text-lg md:text-2xl font-black uppercase tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md line-clamp-1">
+                    <h3 className="font-oswald text-sm sm:text-lg md:text-2xl font-black tracking-wider text-white group-hover:text-pubg-orange transition-colors drop-shadow-md line-clamp-1">
                       {player.nickname}
                     </h3>
                     {player.achievements && player.achievements.length > 0 && player.achievements[0] && (
