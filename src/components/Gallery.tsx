@@ -212,9 +212,7 @@ export default function Gallery({ onBack }: GalleryProps) {
                     <video 
                       src={selectedItem.fileUrl} 
                       controls 
-                      autoPlay
-                      controlsList="nodownload"
-                      onContextMenu={(e) => e.preventDefault()}
+                      autoPlay 
                       className="w-full h-full object-contain"
                     />
                   ) : (

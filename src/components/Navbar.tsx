@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Menu, X, ShieldAlert, Award, Radio, Disc, LogOut } from 'lucide-react';
+import { Menu, X, ShieldAlert, Award, Radio, Disc } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useClan } from '../context/ClanContext';
-import { useAuth } from '../context/AuthContext';
-import TelegramLoginButton from './TelegramLoginButton';
 
 interface NavbarProps {
   activeTab: string;
@@ -13,8 +11,6 @@ interface NavbarProps {
 export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { settings } = useClan();
-  const { user, login, logout } = useAuth();
-
 
   React.useEffect(() => {
     if (isOpen) {
@@ -55,29 +51,6 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
       osc.stop(ctx.currentTime + 0.15);
     } catch (e) {
       // AudioContext not allowed or not supported
-    }
-  };
-
-  const handleTelegramAuth = async (tgUser: any) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://music.lordx.uz/api'}/auth/telegram/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ auth_data: tgUser }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          login(data.access, data.refresh, data.user);
-        }
-      } else {
-        console.error('Telegram auth failed', await response.text());
-      }
-    } catch (error) {
-      console.error('Telegram auth error', error);
     }
   };
 
@@ -135,35 +108,15 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
             })}
           </div>
 
-          {/* Social Icons & Status indicator / Auth */}
+          {/* Social Icons & Status indicator */}
           <div className="hidden lg:flex items-center space-x-4 border-l border-gray-800 pl-6">
-            {!user ? (
-              <div className="scale-90 origin-right">
-                <TelegramLoginButton
-                  botName={import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'lordxinter_bot'}
-                  buttonSize="medium"
-                  cornerRadius={4}
-                  onAuthCallback={handleTelegramAuth}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3 bg-battle-gray/50 px-3 py-1.5 rounded border border-white/5">
-                {user.photo_url ? (
-                  <img src={user.photo_url} alt="Profile" className="w-8 h-8 rounded-full border border-pubg-orange/50" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-pubg-orange/20 border border-pubg-orange/50 flex items-center justify-center text-pubg-orange font-bold">
-                    {user.first_name?.[0] || 'U'}
-                  </div>
-                )}
-                <div className="flex flex-col">
-                  <span className="text-sm font-oswald text-white leading-tight">{user.first_name}</span>
-                  <span className="text-[10px] text-gray-400 font-mono leading-none">@{user.username || user.telegram_id}</span>
-                </div>
-                <button onClick={logout} className="ml-2 p-1.5 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded transition-colors" title="Выйти">
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+            <div className="flex items-center space-x-2 bg-pubg-orange/10 px-3 py-1.5 rounded border border-pubg-orange/20">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-green opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyber-green"></span>
+              </span>
+              <span className="text-xs text-cyber-green font-cyber font-medium tracking-wider">RECRUITING OPEN</span>
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -205,43 +158,11 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
                   </button>
                 );
               })}
-              <div className="pt-4 pb-2 px-4 border-t border-gray-800 space-y-4">
-                {!user ? (
-                  <div className="flex justify-center py-2">
-                    <TelegramLoginButton
-                      botName={import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'lordxinter_bot'}
-                      buttonSize="medium"
-                      cornerRadius={4}
-                      onAuthCallback={handleTelegramAuth}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between bg-battle-dark px-4 py-3 rounded-lg border border-white/5">
-                    <div className="flex items-center space-x-3">
-                      {user.photo_url ? (
-                        <img src={user.photo_url} alt="Profile" className="w-10 h-10 rounded-full border border-pubg-orange/50" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-pubg-orange/20 border border-pubg-orange/50 flex items-center justify-center text-pubg-orange font-bold text-lg">
-                          {user.first_name?.[0] || 'U'}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <span className="text-sm font-oswald text-white leading-tight">{user.first_name}</span>
-                        <span className="text-xs text-gray-400 font-mono leading-none">@{user.username || user.telegram_id}</span>
-                      </div>
-                    </div>
-                    <button onClick={logout} className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded transition-colors" title="Выйти">
-                      <LogOut className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between pt-2">
-                  <div className="text-xs text-gray-500 font-mono">EST. {settings.clanFounded || new Date().getFullYear()} • REGION: CIS</div>
-                  <div className="flex items-center space-x-2 bg-pubg-orange/10 px-2.5 py-1 rounded border border-pubg-orange/20">
-                    <span className="h-1.5 w-1.5 rounded-full bg-cyber-green animate-pulse"></span>
-                    <span className="text-[10px] text-cyber-green font-cyber">ACTIVE MATCHES</span>
-                  </div>
+              <div className="pt-4 pb-2 px-4 border-t border-gray-800 flex items-center justify-between">
+                <div className="text-xs text-gray-500 font-mono">EST. {settings.clanFounded || new Date().getFullYear()} • REGION: CIS</div>
+                <div className="flex items-center space-x-2 bg-pubg-orange/10 px-2.5 py-1 rounded border border-pubg-orange/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyber-green animate-pulse"></span>
+                  <span className="text-[10px] text-cyber-green font-cyber">ACTIVE MATCHES</span>
                 </div>
               </div>
             </div>

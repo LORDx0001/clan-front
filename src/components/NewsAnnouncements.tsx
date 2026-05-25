@@ -172,8 +172,6 @@ export default function NewsAnnouncements({ onBack }: NewsProps) {
                           <video 
                             src={item.imageUrl} 
                             autoPlay loop muted playsInline
-                            controlsList="nodownload"
-                            onContextMenu={(e) => e.preventDefault()}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
@@ -263,8 +261,6 @@ export default function NewsAnnouncements({ onBack }: NewsProps) {
                       <video 
                         src={selectedNews.imageUrl} 
                         autoPlay loop muted playsInline
-                        controlsList="nodownload"
-                        onContextMenu={(e) => e.preventDefault()}
                         className="w-full h-full object-cover"
                       />
                     ) : (
