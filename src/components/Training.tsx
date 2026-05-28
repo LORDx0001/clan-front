@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crosshair, Zap, RotateCcw, Target, Trophy, Eye, ChevronLeft, Activity, Play } from 'lucide-react';
 
@@ -10,6 +11,18 @@ interface TrainingProps {
 
 export default function Training({ onBack }: TrainingProps) {
   const [mode, setMode] = useState<GameMode>('menu');
+
+  // Disable scrolling when a game is active
+  useEffect(() => {
+    if (mode !== 'menu') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mode]);
 
   return (
     <div className="min-h-[85vh] flex flex-col p-4">
@@ -196,10 +209,10 @@ function ReactionGame({ onExit }: { onExit: () => void }) {
     return <span className="text-red-400">Слабо (Ниже среднего)</span>;
   };
 
-  return (
+  const content = (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 select-none ${getBg()}`}
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 select-none ${getBg()}`}
       onClick={handleClick}
     >
       <button 
@@ -249,6 +262,8 @@ function ReactionGame({ onExit }: { onExit: () => void }) {
       )}
     </motion.div>
   );
+
+  return createPortal(content, document.body);
 }
 
 // ==========================================
@@ -313,10 +328,10 @@ function AimGame({ onExit }: { onExit: () => void }) {
     return <span className="text-red-400">Слабо (Ниже среднего)</span>;
   };
 
-  return (
+  const content = (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-battle-gray overflow-hidden flex flex-col select-none"
+      className="fixed inset-0 z-[9999] bg-battle-gray overflow-hidden flex flex-col select-none"
     >
       <button 
         onClick={onExit} 
@@ -367,7 +382,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
 
       {/* Playable Area */}
       {playing && (
-        <div className="flex-1 w-full relative cursor-crosshair active:bg-red-500/5 transition-colors" onClick={() => { /* Missed click penalty could go here */ }}>
+        <div className="flex-1 w-full h-full relative cursor-crosshair active:bg-red-500/5 transition-colors absolute inset-0 pt-24" onClick={() => { /* Missed click penalty could go here */ }}>
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -388,6 +403,8 @@ function AimGame({ onExit }: { onExit: () => void }) {
       )}
     </motion.div>
   );
+
+  return createPortal(content, document.body);
 }
 
 // ==========================================
@@ -448,10 +465,10 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
     }
   }, [playing]);
 
-  return (
+  const content = (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black overflow-hidden flex flex-col select-none"
+      className="fixed inset-0 z-[9999] bg-black overflow-hidden flex flex-col select-none"
     >
       <button 
         onClick={onExit} 
@@ -491,7 +508,7 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
 
       {/* Playable Area */}
       {playing && (
-        <div className="flex-1 w-full relative">
+        <div className="flex-1 w-full h-full relative absolute inset-0 pt-24">
           <motion.div
             animate={{ left: `${pos.x}%`, top: `${pos.y}%` }}
             transition={{ duration, ease: "easeInOut" }}
@@ -503,4 +520,6 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
       )}
     </motion.div>
   );
+
+  return createPortal(content, document.body);
 }
