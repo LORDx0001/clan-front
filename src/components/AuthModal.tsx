@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Lock, User as UserIcon, Loader } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Lock, User as UserIcon, Loader, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -15,127 +16,212 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
+  // Close on Escape key
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    if (isOpen) {
+      document.addEventListener('keydown', onKey);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
       const res = await fetch(`${apiUrl}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
-        credentials: 'omit' // use omit if cross-origin without proper CORS setup, but normally include. 
-        // For testing we will just fake login if it fails due to CORS, but let's try real first:
+        credentials: 'include',
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok && data.success) {
-        // fetch profile immediately
-        const profileRes = await fetch(`${apiUrl}/auth/me/`, { credentials: 'omit' });
+        const profileRes = await fetch(`${apiUrl}/auth/me/`, { credentials: 'include' });
         let profile = null;
         if (profileRes.ok) {
-           const pData = await profileRes.json();
-           profile = pData.player;
+          const pData = await profileRes.json();
+          profile = pData.player;
         }
         login(data.username, profile);
+        setUsername('');
+        setPassword('');
         onClose();
       } else {
-        setError(data.error || "Ошибка авторизации");
+        setError(data.error || 'Неверный логин или пароль');
       }
-    } catch (err) {
-      setError("Ошибка сети или сервера");
+    } catch {
+      setError('Ошибка сети. Проверьте подключение к серверу.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <motion.div 
-            key="auth-modal"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="bg-battle-gray border border-pubg-orange/30 p-6 rounded-lg w-full max-w-sm sm:max-w-md max-h-[95vh] overflow-y-auto shadow-[0_0_30px_rgba(255,107,0,0.15)] relative"
-          >
-          {/* Cyber accents */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pubg-orange to-transparent opacity-50" />
-          
-          <button 
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+            style={{ zIndex: 9998 }}
+          />
+
+          {/* Modal — perfectly centered on all screen sizes */}
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 sm:p-6"
+            style={{ zIndex: 9999 }}
           >
-            <X size={20} />
-          </button>
-
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-oswald font-bold tracking-widest text-white mb-2">АВТОРИЗАЦИЯ</h2>
-            <p className="text-xs text-gray-400 font-mono">SECURE SYSTEM ACCESS</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded text-sm font-mono text-center">
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-1">
-              <label className="text-xs font-mono text-gray-400 ml-1">ЛОГИН</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon size={16} className="text-gray-500" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-battle-dark border border-gray-700 text-white pl-10 pr-4 py-3 rounded focus:border-pubg-orange focus:ring-1 focus:ring-pubg-orange/50 transition-all font-mono outline-none"
-                  placeholder="Введите логин"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-mono text-gray-400 ml-1">ПАРОЛЬ</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={16} className="text-gray-500" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-battle-dark border border-gray-700 text-white pl-10 pr-4 py-3 rounded focus:border-pubg-orange focus:ring-1 focus:ring-pubg-orange/50 transition-all font-mono outline-none"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-pubg-orange text-battle-dark font-oswald font-bold tracking-widest py-3 rounded hover:bg-white transition-colors flex items-center justify-center mt-6 disabled:opacity-70"
+            <motion.div
+              key="modal"
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 16 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="relative w-full max-w-[340px] sm:max-w-[400px] md:max-w-[440px]"
+              onClick={(e) => e.stopPropagation()}
             >
-              {loading ? <Loader className="animate-spin" size={20} /> : "ВОЙТИ В СИСТЕМУ"}
-            </button>
-            
-            <div className="text-center mt-4">
-              <p className="text-xs text-gray-500 font-mono">
-                Нет аккаунта? Регистрация проходит через официального Telegram бота.
-              </p>
-            </div>
-          </form>
-          </motion.div>
-        </div>
+              {/* Card */}
+              <div className="bg-[#111318] border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.8),0_0_30px_rgba(255,107,0,0.12)]">
+
+                {/* Top accent line */}
+                <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+
+                {/* Header */}
+                <div className="px-6 pt-7 pb-5 text-center relative">
+                  <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <X size={16} />
+                  </button>
+
+                  {/* Icon badge */}
+                  <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                    <Shield size={26} className="text-orange-400" />
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl font-black tracking-widest text-white uppercase font-oswald">
+                    Авторизация
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono mt-1 tracking-wider">
+                    SECURE SYSTEM ACCESS
+                  </p>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="px-6 pb-7 space-y-4">
+
+                  {/* Error */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-xs font-mono text-center">
+                          {error}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Username */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-mono text-gray-400 tracking-widest uppercase ml-0.5">
+                      Логин
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <UserIcon size={15} className="text-gray-600" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="username"
+                        autoFocus
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Введите логин"
+                        className="w-full bg-white/5 border border-white/10 text-white text-sm pl-10 pr-4 py-3 rounded-xl
+                          placeholder:text-gray-600 font-mono outline-none
+                          focus:border-orange-500/60 focus:bg-orange-500/5 focus:ring-1 focus:ring-orange-500/20
+                          transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-mono text-gray-400 tracking-widest uppercase ml-0.5">
+                      Пароль
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <Lock size={15} className="text-gray-600" />
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-white/5 border border-white/10 text-white text-sm pl-10 pr-4 py-3 rounded-xl
+                          placeholder:text-gray-600 font-mono outline-none
+                          focus:border-orange-500/60 focus:bg-orange-500/5 focus:ring-1 focus:ring-orange-500/20
+                          transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-2 w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600
+                      text-black font-oswald font-black tracking-widest uppercase text-sm
+                      py-3.5 rounded-xl transition-all duration-200
+                      flex items-center justify-center gap-2
+                      disabled:opacity-60 disabled:cursor-not-allowed
+                      shadow-[0_4px_20px_rgba(255,107,0,0.3)]"
+                  >
+                    {loading ? (
+                      <><Loader className="animate-spin" size={17} /> <span>Проверка...</span></>
+                    ) : (
+                      'Войти в систему'
+                    )}
+                  </button>
+
+                  {/* Footer note */}
+                  <p className="text-center text-[11px] text-gray-600 font-mono pt-1">
+                    Регистрация — через Telegram бот клана
+                  </p>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        </>
       )}
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }

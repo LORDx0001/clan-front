@@ -1,52 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GalleryItem } from '../types';
 import { useClan } from '../context/ClanContext';
-import { Play, Eye, Heart, Calendar, Plus, X, Upload, Grid, Video, Camera, Trophy, Sparkles, ArrowLeft } from 'lucide-react';
+import { Play, X, Video, Camera, Trophy, ArrowLeft } from 'lucide-react';
 
 interface GalleryProps {
   onBack?: () => void;
+}
+
+// Lazy image with IntersectionObserver — loads only when near viewport
+function LazyImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect(); } },
+      { rootMargin: '150px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <img
+      ref={ref}
+      src={inView ? src : undefined}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      onLoad={() => setLoaded(true)}
+      onContextMenu={(e) => e.preventDefault()}
+      draggable={false}
+      className={`${className} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+    />
+  );
 }
 
 export default function Gallery({ onBack }: GalleryProps) {
   const { gallery: contextGallery } = useClan();
   const [gallery, setGallery] = useState<GalleryItem[]>(contextGallery);
 
-  useEffect(() => {
-    setGallery(contextGallery);
-  }, [contextGallery]);
+  useEffect(() => { setGallery(contextGallery); }, [contextGallery]);
 
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'video' | 'screenshot' | 'trophy'>('all');
 
   useEffect(() => {
     if (selectedItem) {
-      document.body.classList.add('overflow-hidden');
-      document.documentElement.classList.add('overflow-hidden');
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.classList.remove('overflow-hidden');
-      document.documentElement.classList.remove('overflow-hidden');
+      document.body.style.overflow = '';
     }
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-      document.documentElement.classList.remove('overflow-hidden');
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [selectedItem]);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'video' | 'screenshot' | 'trophy'>('all');
-  
-  // Custom video playback control or simulated clip view count state
-  const [likes, setLikes] = useState<{ [key: string]: number }>({});
-  const [likedList, setLikedList] = useState<{ [key: string]: boolean }>({});
-
-  const handleLike = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const alreadyLiked = likedList[id];
-    setLikedList(prev => ({ ...prev, [id]: !alreadyLiked }));
-    setLikes(prev => ({
-      ...prev,
-      [id]: (prev[id] || 0) + (alreadyLiked ? -1 : 1)
-    }));
-  };
+  const handleContextMenu = useCallback((e: React.MouseEvent) => e.preventDefault(), []);
 
   const filteredGallery = gallery.filter(item => {
     if (activeTab === 'all') return true;
@@ -54,7 +64,7 @@ export default function Gallery({ onBack }: GalleryProps) {
   });
 
   return (
-    <div className="bg-battle-dark min-h-screen py-16 text-white px-2 sm:px-4 md:px-6">
+    <div className="bg-battle-dark min-h-screen py-16 text-white px-2 sm:px-4 md:px-6" onContextMenu={handleContextMenu}>
       <div className="max-w-[96%] lg:max-w-[1550px] mx-auto space-y-8">
         
         {onBack && (
@@ -79,7 +89,7 @@ export default function Gallery({ onBack }: GalleryProps) {
               МЕДИА ИГРОВАЯ <span className="text-pubg-orange">ГАЛЕРЕЯ</span>
             </h2>
             <p className="text-gray-400 font-sans max-w-2xl text-xs sm:text-sm">
-              Архив лучших хайлайтов основы, видеоклипов со скримов и скриншотов сквад-побед на турнирах СНГ. Все скриншоты и хайлайты управляются через панель джанго админ.
+              Архив лучших хайлайтов основы, видеоклипов со скримов и скриншотов сквад-побед.
             </p>
           </div>
         </div>
@@ -87,8 +97,8 @@ export default function Gallery({ onBack }: GalleryProps) {
         {/* Tab Filters */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-800 pb-5">
           <div className="flex flex-wrap gap-2">
-            {['all', 'video', 'screenshot', 'trophy'].map((tab) => {
-              const labels: { [key: string]: string } = {
+            {(['all', 'video', 'screenshot', 'trophy'] as const).map((tab) => {
+              const labels: Record<string, string> = {
                 all: 'ВСЕ ФАЙЛЫ',
                 video: 'КЛИПЫ / ХАЙЛАЙТЫ',
                 screenshot: 'СКРИНШОТЫ КВ',
@@ -98,11 +108,9 @@ export default function Gallery({ onBack }: GalleryProps) {
               return (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab as any)}
+                  onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 font-oswald text-xs tracking-widest uppercase rounded transition-all flex items-center gap-1.5 ${
-                    isActive
-                      ? 'bg-pubg-orange text-battle-dark font-black'
-                      : 'bg-battle-gray hover:bg-battle-light/40 text-gray-400'
+                    isActive ? 'bg-pubg-orange text-battle-dark font-black' : 'bg-battle-gray hover:bg-battle-light/40 text-gray-400'
                   }`}
                 >
                   {tab === 'video' && <Video className="w-3" />}
@@ -115,74 +123,60 @@ export default function Gallery({ onBack }: GalleryProps) {
           </div>
         </div>
 
-
-
-        {/* Media Grid Cards */}
+        {/* Media Grid */}
         {filteredGallery.length === 0 ? (
           <div className="text-center py-16 bg-battle-gray border-2 border-dashed border-gray-800 rounded-lg space-y-3">
             <Camera className="w-12 h-12 text-gray-600 mx-auto" />
             <h3 className="font-oswald text-xl uppercase text-gray-400">Галерея пуста</h3>
             <p className="text-xs text-gray-500 font-sans max-w-md mx-auto">
-              В данном разделе пока нет опубликованных медиа-материалов. Все скриншоты и хайлайты загружаются через панель управления.
+              В данном разделе пока нет опубликованных медиа-материалов.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <AnimatePresence>
-              {filteredGallery.map((item) => {
-                return (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    whileHover={{ y: -5 }}
-                    onClick={() => setSelectedItem(item)}
-                    className="bg-battle-gray border-2 border-gray-800 rounded-lg overflow-hidden cursor-pointer group relative transition-all duration-300"
-                  >
-                    {/* Thumbnail Cover */}
-                    <div className="relative aspect-video overflow-hidden bg-battle-dark/50">
-                      <img 
-                        src={item.thumbnail} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        referrerPolicy="no-referrer"
-                      />
-
-                      {/* Dark gradient blur block over card bottom */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-battle-gray/95 via-transparent to-transparent opacity-90" />
-
-                      {/* Media Type badge overlays */}
-                      <div className="absolute top-2.5 left-2.5 bg-battle-dark/80 border border-white/10 px-2.5 py-1 rounded text-[9px] font-cyber tracking-widest uppercase text-pubg-orange">
-                        {item.category}
+              {filteredGallery.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ y: -5 }}
+                  onClick={() => setSelectedItem(item)}
+                  className="bg-battle-gray border-2 border-gray-800 rounded-lg overflow-hidden cursor-pointer group relative transition-all duration-300"
+                >
+                  <div className="relative aspect-video overflow-hidden bg-battle-dark/50 select-none">
+                    <LazyImage
+                      src={item.thumbnail}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-battle-gray/95 via-transparent to-transparent opacity-90" />
+                    <div className="absolute top-2.5 left-2.5 bg-battle-dark/80 border border-white/10 px-2.5 py-1 rounded text-[9px] font-cyber tracking-widest uppercase text-pubg-orange">
+                      {item.category}
+                    </div>
+                    {item.type === 'video' && (
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-pubg-orange/90 text-battle-dark flex items-center justify-center shadow-[0_0_15px_rgba(255,152,0,0.5)] group-hover:scale-110 transition-transform">
+                        <Play className="w-5 h-5 fill-battle-dark translate-x-0.5" />
                       </div>
-
-                      {/* Large glowing play button overlay for video content */}
-                      {item.type === 'video' && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-pubg-orange/90 text-battle-dark flex items-center justify-center shadow-[0_0_15px_rgba(255,152,0,0.5)] group-hover:scale-110 transition-transform">
-                          <Play className="w-5 h-5 fill-battle-dark translate-x-0.5" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info text section */}
-                    <div className="p-3.5 pb-5 space-y-1">
-                      <h3 className="font-oswald text-sm font-bold tracking-wide uppercase line-clamp-1 group-hover:text-pubg-orange transition-colors">
-                        {item.title}
-                      </h3>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    )}
+                  </div>
+                  <div className="p-3.5 pb-5 space-y-1">
+                    <h3 className="font-oswald text-sm font-bold tracking-wide uppercase line-clamp-1 group-hover:text-pubg-orange transition-colors">
+                      {item.title}
+                    </h3>
+                  </div>
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
         )}
 
-        {/* Cinematic Montage Lightbox Modal */}
+        {/* Lightbox Modal */}
         <AnimatePresence>
           {selectedItem && (
-            <div 
+            <div
               onClick={() => setSelectedItem(null)}
               className="fixed inset-0 z-[150] flex items-start justify-center p-4 pt-24 md:pt-28 pb-10 bg-battle-dark/95 backdrop-blur-md cursor-pointer overflow-y-auto"
             >
@@ -191,9 +185,10 @@ export default function Gallery({ onBack }: GalleryProps) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
+                onContextMenu={handleContextMenu}
                 className="bg-battle-gray border-2 border-pubg-orange/40 text-white w-full max-w-4xl rounded-lg overflow-hidden relative shadow-[0_0_35px_rgba(255,152,0,0.2)] max-h-[85vh] overflow-y-auto cursor-default"
               >
-                {/* Gunscope Style UI overlay anchors for cyber-montage look */}
+                {/* Corner accents */}
                 <div className="absolute top-2.5 left-2.5 z-10 w-4 h-4 border-l border-t border-pubg-orange/60" />
                 <div className="absolute top-2.5 right-2.5 z-10 w-4 h-4 border-r border-t border-pubg-orange/60" />
                 <div className="absolute bottom-2.5 left-2.5 z-10 w-4 h-4 border-l border-b border-pubg-orange/60" />
@@ -206,30 +201,31 @@ export default function Gallery({ onBack }: GalleryProps) {
                   <X className="w-5 h-5" />
                 </button>
 
-                {/* Media Container Box */}
-                <div className="relative aspect-video w-full bg-black flex items-center justify-center">
+                {/* Media */}
+                <div className="relative aspect-video w-full bg-black flex items-center justify-center select-none">
                   {selectedItem.type === 'video' ? (
-                    <video 
-                      src={selectedItem.fileUrl} 
-                      controls 
-                      autoPlay 
+                    <video
+                      src={selectedItem.fileUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      controlsList="nodownload noremoteplayback"
+                      disablePictureInPicture
+                      onContextMenu={handleContextMenu}
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <img 
-                      src={selectedItem.fileUrl} 
-                      alt={selectedItem.title} 
-                      className="w-full h-full object-contain"
-                      referrerPolicy="no-referrer"
+                    <img
+                      src={selectedItem.fileUrl}
+                      alt={selectedItem.title}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                      onContextMenu={handleContextMenu}
+                      className="w-full h-full object-contain pointer-events-none"
                     />
                   )}
-
-                  {/* Scope Tactical Target Crosshairs (only subtle transparent visuals strictly fitting cyber aesthetics) */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                    <div className="w-64 h-64 rounded-full border border-pubg-orange" />
-                    <div className="w-0.5 h-12 bg-pubg-orange absolute" />
-                    <div className="w-12 h-0.5 bg-pubg-orange absolute" />
-                  </div>
                 </div>
 
                 <div className="p-5 md:p-6 bg-battle-gray space-y-3 border-t border-gray-800">
@@ -251,10 +247,10 @@ export default function Gallery({ onBack }: GalleryProps) {
                   )}
 
                   {selectedItem.taggedPlayers && selectedItem.taggedPlayers.length > 0 && (
-                    <div className="pt-2.5 border-t border-gray-850 flex flex-wrap items-center gap-2">
+                    <div className="pt-2.5 border-t border-gray-800 flex flex-wrap items-center gap-2">
                       <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">ОТМЕЧЕННЫЕ УЧАСТНИКИ:</span>
                       {selectedItem.taggedPlayers.map((player: any) => (
-                        <span 
+                        <span
                           key={player.id}
                           className="bg-battle-dark border border-white/10 hover:border-pubg-orange text-[10px] text-pubg-orange font-cyber px-2.5 py-0.5 rounded transition-colors"
                         >
@@ -264,7 +260,6 @@ export default function Gallery({ onBack }: GalleryProps) {
                     </div>
                   )}
                 </div>
-
               </motion.div>
             </div>
           )}
