@@ -6,19 +6,20 @@ import NewsAnnouncements from './components/NewsAnnouncements';
 import RulesRecruitment from './components/RulesRecruitment';
 import Gallery from './components/Gallery';
 import Profile from './components/Profile';
+import ReactionTime from './components/ReactionTime';
 import { useClan } from './context/ClanContext';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>(() => {
     // Check URL hash first (e.g. #roster)
     const hash = window.location.hash.replace('#', '');
-    if (['main', 'roster', 'news', 'rules', 'gallery'].includes(hash)) {
+    if (['main', 'roster', 'news', 'rules', 'gallery', 'reaction'].includes(hash)) {
       return hash;
     }
     
     // Fallback to localStorage
     const cachedTab = localStorage.getItem('activeTab');
-    if (cachedTab && ['main', 'roster', 'news', 'rules', 'gallery', 'profile'].includes(cachedTab)) {
+    if (cachedTab && ['main', 'roster', 'news', 'rules', 'gallery', 'profile', 'reaction'].includes(cachedTab)) {
       return cachedTab;
     }
     
@@ -88,6 +89,8 @@ export default function App() {
         return <Gallery onBack={() => setActiveTab('main')} />;
       case 'profile':
         return <Profile onBack={() => setActiveTab('main')} />;
+      case 'reaction':
+        return <ReactionTime onBack={() => setActiveTab('main')} />;
       default:
         return <Hero onTabChange={setActiveTab} />;
     }
@@ -148,6 +151,7 @@ export default function App() {
               <button onClick={() => setActiveTab('gallery')} className="text-left hover:text-pubg-orange transition-colors">ГАЛЕРЕЯ</button>
               <button onClick={() => setActiveTab('news')} className="text-left hover:text-pubg-orange transition-colors">НОВОСТИ</button>
               <button onClick={() => setActiveTab('rules')} className="text-left hover:text-pubg-orange transition-colors">РЕКРУТИНГ</button>
+              <button onClick={() => setActiveTab('reaction')} className="text-left hover:text-pubg-orange transition-colors">ТРЕНИРОВКА</button>
             </div>
           </div>
 

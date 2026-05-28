@@ -33,6 +33,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
     { id: 'gallery', label: 'ГАЛЕРЕЯ' },
     { id: 'news', label: 'НОВОСТИ' },
     { id: 'rules', label: 'ПРАВИЛА И РЕКРУТИНГ' },
+    { id: 'reaction', label: 'ТРЕНИРОВКА' },
   ];
 
   const handleNavClick = (tabId: string) => {
