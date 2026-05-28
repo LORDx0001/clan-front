@@ -47,9 +47,9 @@ export default function Training({ onBack }: TrainingProps) {
       <div className="flex-1 w-full max-w-6xl mx-auto relative flex flex-col">
         <AnimatePresence mode="wait">
           {mode === 'menu' && <MainMenu key="menu" onSelect={setMode} />}
-          {mode === 'reaction' && <ReactionGame key="reaction" />}
-          {mode === 'aim' && <AimGame key="aim" />}
-          {mode === 'tracking' && <TrackingGame key="tracking" />}
+          {mode === 'reaction' && <ReactionGame key="reaction" onExit={() => setMode('menu')} />}
+          {mode === 'aim' && <AimGame key="aim" onExit={() => setMode('menu')} />}
+          {mode === 'tracking' && <TrackingGame key="tracking" onExit={() => setMode('menu')} />}
         </AnimatePresence>
       </div>
     </div>
@@ -140,7 +140,7 @@ function MainMenu({ onSelect }: { onSelect: (m: GameMode) => void }) {
 // ==========================================
 // 1. REACTION GAME
 // ==========================================
-function ReactionGame() {
+function ReactionGame({ onExit }: { onExit: () => void }) {
   type RState = 'idle' | 'waiting' | 'ready' | 'result' | 'early';
   const [state, setState] = useState<RState>('idle');
   const [startTime, setStartTime] = useState(0);
@@ -189,12 +189,26 @@ function ReactionGame() {
     return 'bg-battle-gray hover:bg-battle-gray/80 border-2 border-pubg-orange/30';
   };
 
+  const getRank = (ms: number) => {
+    if (ms < 200) return <span className="text-green-400">Киберспортсмен (Выше среднего)</span>;
+    if (ms < 250) return <span className="text-yellow-400">Отлично (Топ 20%)</span>;
+    if (ms < 300) return <span className="text-blue-400">Хорошо (Средний уровень)</span>;
+    return <span className="text-red-400">Слабо (Ниже среднего)</span>;
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-      className={`w-full flex-1 min-h-[50vh] sm:min-h-[60vh] rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 shadow-2xl p-4 text-center select-none ${getBg()}`}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 select-none ${getBg()}`}
       onClick={handleClick}
     >
+      <button 
+        onClick={(e) => { e.stopPropagation(); onExit(); }} 
+        className="absolute top-6 right-6 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
+      >
+        Закрыть ❌
+      </button>
+
       {state === 'idle' && (
         <>
           <Zap className="w-16 h-16 sm:w-24 sm:h-24 text-pubg-orange mb-4 sm:mb-6 animate-pulse" />
@@ -219,7 +233,11 @@ function ReactionGame() {
         <>
           <Crosshair className="w-16 h-16 sm:w-24 sm:h-24 text-white mb-4 sm:mb-6" />
           <h2 className="text-4xl sm:text-6xl font-black text-white uppercase font-oswald mb-2 sm:mb-4">{result} ms</h2>
-          <p className="text-base sm:text-xl text-white/80 mb-6">Кликните, чтобы попробовать снова</p>
+          <div className="mb-6 flex gap-2 items-center text-sm sm:text-base font-cyber bg-black/40 px-4 py-2 rounded border border-white/20">
+            <Target className="w-4 h-4 text-pubg-orange" />
+            Оценка: {result && getRank(result)}
+          </div>
+          <p className="text-base sm:text-xl text-white/80">Кликните, чтобы попробовать снова</p>
         </>
       )}
       {state === 'early' && (
@@ -236,7 +254,7 @@ function ReactionGame() {
 // ==========================================
 // 2. AIM GAME
 // ==========================================
-function AimGame() {
+function AimGame({ onExit }: { onExit: () => void }) {
   const GAME_DURATION = 30; // 30 seconds
   const [playing, setPlaying] = useState(false);
   const [score, setScore] = useState(0);
@@ -288,17 +306,31 @@ function AimGame() {
     return () => clearTimeout(timer);
   }, [playing, timeLeft]);
 
+  const getAimRank = (score: number) => {
+    if (score >= 40) return <span className="text-green-400">Киберспортсмен (Выше среднего)</span>;
+    if (score >= 30) return <span className="text-yellow-400">Отлично (Топ 20%)</span>;
+    if (score >= 20) return <span className="text-blue-400">Хорошо (Средний уровень)</span>;
+    return <span className="text-red-400">Слабо (Ниже среднего)</span>;
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-      className="w-full flex-1 min-h-[50vh] sm:min-h-[60vh] bg-battle-gray border-2 border-red-500/30 rounded-2xl relative overflow-hidden flex flex-col select-none"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-battle-gray overflow-hidden flex flex-col select-none"
     >
+      <button 
+        onClick={onExit} 
+        className="absolute top-6 right-6 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
+      >
+        Закрыть ❌
+      </button>
+
       {/* HUD */}
-      <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 pointer-events-none mt-20 sm:mt-0">
         <div className="bg-black/50 backdrop-blur px-4 py-2 rounded text-white font-oswald text-xl sm:text-2xl border border-white/10">
           Время: <span className={timeLeft <= 5 ? "text-red-500" : "text-pubg-orange"}>{timeLeft}s</span>
         </div>
-        <div className="bg-black/50 backdrop-blur px-4 py-2 rounded text-white font-oswald text-xl sm:text-2xl border border-white/10">
+        <div className="bg-black/50 backdrop-blur px-4 py-2 rounded text-white font-oswald text-xl sm:text-2xl border border-white/10 hidden sm:block">
           Счет: <span className="text-green-400">{score}</span>
         </div>
       </div>
@@ -316,11 +348,17 @@ function AimGame() {
       )}
 
       {showResult && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20 backdrop-blur-sm">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20 backdrop-blur-sm text-center">
           <Trophy className="w-24 h-24 text-yellow-400 mb-4" />
           <h2 className="text-4xl sm:text-6xl text-white font-black font-oswald mb-4 uppercase">Время вышло!</h2>
           <div className="text-xl sm:text-3xl text-gray-300 font-oswald mb-2">Ваш счет: <span className="text-pubg-orange font-black">{score}</span> мишеней</div>
-          <div className="text-sm sm:text-lg text-gray-400 font-mono mb-8">({(score / GAME_DURATION).toFixed(2)} кликов/сек)</div>
+          <div className="text-sm sm:text-lg text-gray-400 font-mono mb-4">({(score / GAME_DURATION).toFixed(2)} кликов/сек)</div>
+          
+          <div className="mb-8 flex gap-2 items-center text-sm sm:text-base font-cyber bg-black/40 px-4 py-2 rounded border border-white/20">
+            <Target className="w-4 h-4 text-pubg-orange" />
+            Оценка: {getAimRank(score)}
+          </div>
+
           <button onClick={start} className="flex items-center gap-2 px-6 py-3 border-2 border-white/20 text-white font-bold font-cyber text-lg uppercase rounded-lg hover:bg-white/10 transition-colors">
             <RotateCcw className="w-5 h-5" /> Играть снова
           </button>
@@ -355,7 +393,7 @@ function AimGame() {
 // ==========================================
 // 3. EYE TRACKING GAME
 // ==========================================
-function TrackingGame() {
+function TrackingGame({ onExit }: { onExit: () => void }) {
   const GAME_DURATION = 30; // 30 seconds
   const [playing, setPlaying] = useState(false);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
@@ -412,11 +450,18 @@ function TrackingGame() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-      className="w-full flex-1 min-h-[50vh] sm:min-h-[60vh] bg-black border-2 border-blue-500/30 rounded-2xl relative overflow-hidden flex flex-col select-none"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black overflow-hidden flex flex-col select-none"
     >
+      <button 
+        onClick={onExit} 
+        className="absolute top-6 right-6 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
+      >
+        Закрыть ❌
+      </button>
+
       {/* HUD */}
-      <div className="absolute top-0 left-0 w-full p-4 flex justify-center items-center z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 w-full p-4 flex justify-center items-center z-10 pointer-events-none mt-20 sm:mt-0">
         <div className="bg-black/80 px-6 py-2 rounded-full text-white font-oswald text-xl sm:text-2xl border border-white/10 flex gap-3">
           <Eye className="w-6 h-6 text-blue-400" />
           <span className={timeLeft <= 5 ? "text-red-500" : "text-blue-400"}>00:{timeLeft.toString().padStart(2, '0')}</span>
