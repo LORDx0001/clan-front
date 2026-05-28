@@ -174,7 +174,8 @@ function ReactionGame({ onExit }: { onExit: () => void }) {
     }, delay);
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.PointerEvent) => {
+    // If the close button was clicked, do nothing here (handled by stopPropagation)
     if (state === 'idle' || state === 'result' || state === 'early') {
       start();
     } else if (state === 'waiting') {
@@ -213,10 +214,10 @@ function ReactionGame({ onExit }: { onExit: () => void }) {
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 select-none ${getBg()}`}
-      onClick={handleClick}
+      onPointerDown={handleClick}
     >
       <button 
-        onClick={(e) => { e.stopPropagation(); onExit(); }} 
+        onPointerDown={(e) => { e.stopPropagation(); onExit(); }} 
         className="absolute top-6 right-6 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
       >
         Закрыть ❌
@@ -299,7 +300,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
     moveTarget();
   };
 
-  const handleHit = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleHit = (e: React.PointerEvent) => {
     e.stopPropagation();
     if (!playing) return;
     setScore(s => s + 1);
@@ -334,7 +335,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
       className="fixed inset-0 z-[9999] bg-battle-gray overflow-hidden flex flex-col select-none"
     >
       <button 
-        onClick={onExit} 
+        onPointerDown={(e) => { e.stopPropagation(); onExit(); }} 
         className="absolute top-6 right-6 px-4 py-2 bg-black/40 hover:bg-black/60 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
       >
         Закрыть ❌
@@ -356,7 +357,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
           <h2 className="text-3xl sm:text-5xl text-white font-black font-oswald mb-2 uppercase">Aim Тренер</h2>
           <p className="text-gray-300 text-center px-4 max-w-md mb-2">Нажимайте на появляющиеся мишени как можно быстрее. У вас 30 секунд.</p>
           {best !== null && <p className="text-pubg-orange font-cyber mb-6"><Trophy className="inline w-4 h-4 mr-1 -mt-1"/> Рекорд: {best} мишеней</p>}
-          <button onClick={start} className="flex items-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black font-oswald text-2xl uppercase rounded-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+          <button onPointerDown={start} className="flex items-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black font-oswald text-2xl uppercase rounded-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
             <Play className="w-6 h-6 fill-current" /> Старт
           </button>
         </div>
@@ -374,7 +375,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
             Оценка: {getAimRank(score)}
           </div>
 
-          <button onClick={start} className="flex items-center gap-2 px-6 py-3 border-2 border-white/20 text-white font-bold font-cyber text-lg uppercase rounded-lg hover:bg-white/10 transition-colors">
+          <button onPointerDown={start} className="flex items-center gap-2 px-6 py-3 border-2 border-white/20 text-white font-bold font-cyber text-lg uppercase rounded-lg hover:bg-white/10 transition-colors">
             <RotateCcw className="w-5 h-5" /> Играть снова
           </button>
         </div>
@@ -387,8 +388,7 @@ function AimGame({ onExit }: { onExit: () => void }) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            onClick={handleHit}
-            onTouchStart={handleHit}
+            onPointerDown={handleHit}
             className="absolute rounded-full bg-red-500 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.8)] cursor-pointer hover:bg-red-400 border-2 border-white/50"
             style={{
               left: `calc(${targetPos.x}% - ${targetSize/2}px)`,
@@ -471,7 +471,7 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
       className="fixed inset-0 z-[9999] bg-black overflow-hidden flex flex-col select-none"
     >
       <button 
-        onClick={onExit} 
+        onPointerDown={(e) => { e.stopPropagation(); onExit(); }} 
         className="absolute top-6 right-6 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded font-cyber text-sm text-white uppercase tracking-widest transition-all z-50"
       >
         Закрыть ❌
@@ -490,7 +490,7 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
           <Eye className="w-20 h-20 text-blue-400 mb-4" />
           <h2 className="text-3xl sm:text-5xl text-white font-black font-oswald mb-2 uppercase">Трекинг глаз</h2>
           <p className="text-gray-300 text-center px-4 max-w-md mb-6">Удерживайте взгляд на двигающейся точке. Скорость и направление будут постоянно меняться. (30 сек)</p>
-          <button onClick={start} className="flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black font-oswald text-2xl uppercase rounded-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.5)]">
+          <button onPointerDown={start} className="flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black font-oswald text-2xl uppercase rounded-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.5)]">
             <Play className="w-6 h-6 fill-current" /> Начать
           </button>
         </div>
@@ -500,7 +500,7 @@ function TrackingGame({ onExit }: { onExit: () => void }) {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-20 backdrop-blur-sm">
           <h2 className="text-4xl sm:text-6xl text-white font-black font-oswald mb-4 uppercase">Отличная работа!</h2>
           <p className="text-gray-300 text-center px-4 max-w-md mb-8">Регулярная тренировка помогает быстрее фокусироваться на целях в игре.</p>
-          <button onClick={start} className="flex items-center gap-2 px-6 py-3 border-2 border-blue-500/50 text-white font-bold font-cyber text-lg uppercase rounded-lg hover:bg-blue-600/20 transition-colors">
+          <button onPointerDown={start} className="flex items-center gap-2 px-6 py-3 border-2 border-blue-500/50 text-white font-bold font-cyber text-lg uppercase rounded-lg hover:bg-blue-600/20 transition-colors">
             <RotateCcw className="w-5 h-5" /> Повторить
           </button>
         </div>
