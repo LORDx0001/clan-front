@@ -5,6 +5,7 @@ import Roster from './components/Roster';
 import NewsAnnouncements from './components/NewsAnnouncements';
 import RulesRecruitment from './components/RulesRecruitment';
 import Gallery from './components/Gallery';
+import Profile from './components/Profile';
 import { useClan } from './context/ClanContext';
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
     
     // Fallback to localStorage
     const cachedTab = localStorage.getItem('activeTab');
-    if (cachedTab && ['main', 'roster', 'news', 'rules', 'gallery'].includes(cachedTab)) {
+    if (cachedTab && ['main', 'roster', 'news', 'rules', 'gallery', 'profile'].includes(cachedTab)) {
       return cachedTab;
     }
     
@@ -85,6 +86,8 @@ export default function App() {
         return <RulesRecruitment onBack={() => setActiveTab('main')} />;
       case 'gallery':
         return <Gallery onBack={() => setActiveTab('main')} />;
+      case 'profile':
+        return <Profile onBack={() => setActiveTab('main')} />;
       default:
         return <Hero onTabChange={setActiveTab} />;
     }

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Menu, X, ShieldAlert, Award, Radio, Disc } from 'lucide-react';
+import { Menu, X, ShieldAlert, Award, Radio, Disc, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useClan } from '../context/ClanContext';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
 
 interface NavbarProps {
   activeTab: string;
@@ -10,7 +12,9 @@ interface NavbarProps {
 
 export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { settings } = useClan();
+  const { user } = useAuth();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -117,6 +121,17 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
               </span>
               <span className="text-xs text-cyber-green font-cyber font-medium tracking-wider">RECRUITING OPEN</span>
             </div>
+            {user ? (
+              <button onClick={() => setActiveTab('profile')} className="flex items-center space-x-2 border border-pubg-orange/30 text-pubg-orange hover:bg-pubg-orange hover:text-white px-3 py-1.5 rounded transition-colors font-oswald tracking-widest text-sm">
+                <User size={16} />
+                <span>ПРОФИЛЬ</span>
+              </button>
+            ) : (
+              <button onClick={() => setIsAuthModalOpen(true)} className="flex items-center space-x-2 border border-gray-600 text-gray-400 hover:text-white hover:border-pubg-orange hover:bg-pubg-orange/10 px-3 py-1.5 rounded transition-colors font-oswald tracking-widest text-sm">
+                <User size={16} />
+                <span>ВХОД</span>
+              </button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -158,17 +173,20 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
                   </button>
                 );
               })}
-              <div className="pt-4 pb-2 px-4 border-t border-gray-800 flex items-center justify-between">
+                <div className="pt-4 pb-2 px-4 border-t border-gray-800 flex items-center justify-between">
                 <div className="text-xs text-gray-500 font-mono">EST. {settings.clanFounded || new Date().getFullYear()} • REGION: CIS</div>
-                <div className="flex items-center space-x-2 bg-pubg-orange/10 px-2.5 py-1 rounded border border-pubg-orange/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyber-green animate-pulse"></span>
-                  <span className="text-[10px] text-cyber-green font-cyber">ACTIVE MATCHES</span>
-                </div>
+                
+                {user ? (
+                  <button onClick={() => { handleNavClick('profile') }} className="text-pubg-orange font-mono text-xs hover:underline">ПРОФИЛЬ</button>
+                ) : (
+                  <button onClick={() => { setIsAuthModalOpen(true); setIsOpen(false); }} className="text-gray-400 font-mono text-xs hover:text-pubg-orange">ВХОД</button>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </nav>
   );
 }
