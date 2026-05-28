@@ -15,8 +15,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  if (!isOpen) return null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -56,13 +54,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-battle-gray border border-pubg-orange/30 p-6 rounded-lg w-full max-w-md shadow-[0_0_30px_rgba(255,107,0,0.15)] relative overflow-hidden"
-        >
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            key="auth-modal"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="bg-battle-gray border border-pubg-orange/30 p-6 rounded-lg w-full max-w-sm sm:max-w-md max-h-[95vh] overflow-y-auto shadow-[0_0_30px_rgba(255,107,0,0.15)] relative"
+          >
           {/* Cyber accents */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pubg-orange to-transparent opacity-50" />
           
@@ -133,8 +133,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </p>
             </div>
           </form>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
