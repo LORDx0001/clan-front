@@ -10,9 +10,12 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [telegram, setTelegram] = useState('');
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
@@ -32,32 +35,55 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
     setLoading(true);
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
-      const res = await fetch(`${apiUrl}/auth/login/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include',
-      });
+      
+      if (mode === 'login') {
+        const res = await fetch(`${apiUrl}/auth/login/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include',
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (res.ok && data.success) {
-        const profileRes = await fetch(`${apiUrl}/auth/me/`, { credentials: 'include' });
-        let profile = null;
-        if (profileRes.ok) {
-          const pData = await profileRes.json();
-          profile = pData.player;
+        if (res.ok && data.success) {
+          const profileRes = await fetch(`${apiUrl}/auth/me/`, { credentials: 'include' });
+          let profile = null;
+          if (profileRes.ok) {
+            const pData = await profileRes.json();
+            profile = pData.player;
+          }
+          login(data.username, profile);
+          setUsername('');
+          setPassword('');
+          onClose();
+        } else {
+          setError(data.error || 'Неверный логин или пароль');
         }
-        login(data.username, profile);
-        setUsername('');
-        setPassword('');
-        onClose();
       } else {
-        setError(data.error || 'Неверный логин или пароль');
+        // Register mode
+        const res = await fetch(`${apiUrl}/auth/register/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, telegram }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          setSuccessMsg('Регистрация успешна! Ожидайте активации аккаунта администратором.');
+          setUsername('');
+          setPassword('');
+          setTelegram('');
+          setTimeout(() => setMode('login'), 3000);
+        } else {
+          setError(data.error || 'Ошибка при регистрации');
+        }
       }
     } catch {
       setError('Ошибка сети. Проверьте подключение к серверу.');
@@ -65,6 +91,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setLoading(false);
     }
   };
+
+  // Reset state when opening/closing
+  useEffect(() => {
+    if (!isOpen) {
+      setMode('login');
+      setUsername('');
+      setPassword('');
+      setTelegram('');
+      setError('');
+      setSuccessMsg('');
+    }
+  }, [isOpen]);
 
   const modalContent = (
     <AnimatePresence>
@@ -117,15 +155,31 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </div>
 
                   <h2 className="text-xl sm:text-2xl font-black tracking-widest text-white uppercase font-oswald">
-                    Авторизация
+                    {mode === 'login' ? 'Авторизация' : 'Регистрация'}
                   </h2>
                   <p className="text-[11px] text-gray-500 font-mono mt-1 tracking-wider">
-                    SECURE SYSTEM ACCESS
+                    {mode === 'login' ? 'SECURE SYSTEM ACCESS' : 'NEW MEMBER ONBOARDING'}
                   </p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="px-6 pb-7 space-y-4">
+
+                  {/* Success */}
+                  <AnimatePresence>
+                    {successMsg && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-xs font-mono text-center">
+                          {successMsg}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Error */}
                   <AnimatePresence>
@@ -192,10 +246,40 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </div>
                   </div>
 
+                  {/* Telegram (only for register) */}
+                  {mode === 'register' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-1.5 overflow-hidden"
+                    >
+                      <label className="block text-[11px] font-mono text-gray-400 tracking-widest uppercase ml-0.5">
+                        Контакт в Telegram
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 font-mono text-sm">
+                          @
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          value={telegram}
+                          onChange={(e) => setTelegram(e.target.value)}
+                          placeholder="username"
+                          className="w-full bg-white/5 border border-white/10 text-white text-sm pl-9 pr-4 py-3 rounded-xl
+                            placeholder:text-gray-600 font-mono outline-none
+                            focus:border-orange-500/60 focus:bg-orange-500/5 focus:ring-1 focus:ring-orange-500/20
+                            transition-all duration-200"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Submit */}
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !!successMsg}
                     className="mt-2 w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600
                       text-black font-oswald font-black tracking-widest uppercase text-sm
                       py-3.5 rounded-xl transition-all duration-200
@@ -204,16 +288,28 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       shadow-[0_4px_20px_rgba(255,107,0,0.3)]"
                   >
                     {loading ? (
-                      <><Loader className="animate-spin" size={17} /> <span>Проверка...</span></>
+                      <><Loader className="animate-spin" size={17} /> <span>Отправка...</span></>
                     ) : (
-                      'Войти в систему'
+                      mode === 'login' ? 'Войти в систему' : 'Создать аккаунт'
                     )}
                   </button>
 
-                  {/* Footer note */}
-                  <p className="text-center text-[11px] text-gray-600 font-mono pt-1">
-                    Регистрация — через Telegram бот клана
-                  </p>
+                  {/* Toggle mode */}
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode(mode === 'login' ? 'register' : 'login');
+                        setError('');
+                        setSuccessMsg('');
+                      }}
+                      className="text-[11px] text-gray-400 hover:text-white font-mono transition-colors tracking-wide"
+                    >
+                      {mode === 'login' 
+                        ? 'Нет аккаунта? Зарегистрироваться на сайте' 
+                        : 'Уже есть аккаунт? Войти в систему'}
+                    </button>
+                  </div>
                 </form>
               </div>
             </motion.div>
