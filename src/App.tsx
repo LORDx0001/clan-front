@@ -6,7 +6,7 @@ import NewsAnnouncements from './components/NewsAnnouncements';
 import RulesRecruitment from './components/RulesRecruitment';
 import Gallery from './components/Gallery';
 import Profile from './components/Profile';
-import ReactionTime from './components/ReactionTime';
+import Training from './components/Training';
 import { useClan } from './context/ClanContext';
 
 export default function App() {
@@ -90,7 +90,7 @@ export default function App() {
       case 'profile':
         return <Profile onBack={() => setActiveTab('main')} />;
       case 'reaction':
-        return <ReactionTime onBack={() => setActiveTab('main')} />;
+        return <Training onBack={() => setActiveTab('main')} />;
       default:
         return <Hero onTabChange={setActiveTab} />;
     }
