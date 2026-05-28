@@ -13,7 +13,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [telegram, setTelegram] = useState('');
+  const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,7 +70,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         const res = await fetch(`${apiUrl}/auth/register/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, telegram }),
+          body: JSON.stringify({ username, password, nickname }),
         });
 
         const data = await res.json();
@@ -79,7 +79,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           setSuccessMsg('Регистрация успешна! Ожидайте активации аккаунта администратором.');
           setUsername('');
           setPassword('');
-          setTelegram('');
+          setNickname('');
           setTimeout(() => setMode('login'), 3000);
         } else {
           setError(data.error || 'Ошибка при регистрации');
@@ -98,7 +98,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setMode('login');
       setUsername('');
       setPassword('');
-      setTelegram('');
+      setNickname('');
       setError('');
       setSuccessMsg('');
     }
@@ -246,7 +246,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </div>
                   </div>
 
-                  {/* Telegram (only for register) */}
+                  {/* Nickname (only for register) */}
                   {mode === 'register' && (
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
@@ -255,19 +255,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       className="space-y-1.5 overflow-hidden"
                     >
                       <label className="block text-[11px] font-mono text-gray-400 tracking-widest uppercase ml-0.5">
-                        Контакт в Telegram
+                        Никнейм в игре
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-600 font-mono text-sm">
-                          @
+                          <UserIcon size={15} />
                         </div>
                         <input
                           type="text"
                           required
-                          value={telegram}
-                          onChange={(e) => setTelegram(e.target.value)}
-                          placeholder="username"
-                          className="w-full bg-white/5 border border-white/10 text-white text-sm pl-9 pr-4 py-3 rounded-xl
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                          placeholder="Ваш никнейм"
+                          className="w-full bg-white/5 border border-white/10 text-white text-sm pl-10 pr-4 py-3 rounded-xl
                             placeholder:text-gray-600 font-mono outline-none
                             focus:border-orange-500/60 focus:bg-orange-500/5 focus:ring-1 focus:ring-orange-500/20
                             transition-all duration-200"
