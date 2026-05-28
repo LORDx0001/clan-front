@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
       const res = await fetch(`${apiUrl}/auth/me/`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
       await fetch(`${apiUrl}/auth/logout/`, { method: 'POST', credentials: 'include' });
     } catch (e) {
       console.error(e);

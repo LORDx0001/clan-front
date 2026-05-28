@@ -37,9 +37,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     setSuccessMsg('');
     setLoading(true);
-
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
       
       if (mode === 'login') {
         const res = await fetch(`${apiUrl}/auth/login/`, {
