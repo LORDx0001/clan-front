@@ -87,6 +87,18 @@ function MainMenu({ onSelect }: { onSelect: (m: GameMode) => void }) {
     }
   ];
 
+  const getBestScore = (id: GameMode) => {
+    if (id === 'reaction') {
+      const saved = localStorage.getItem('bestReactionTime');
+      return saved ? `${saved} ms` : null;
+    }
+    if (id === 'aim') {
+      const saved = localStorage.getItem('bestAimScore');
+      return saved ? `${saved} очков` : null;
+    }
+    return null;
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -107,9 +119,15 @@ function MainMenu({ onSelect }: { onSelect: (m: GameMode) => void }) {
           <h2 className="relative z-10 text-2xl font-black font-oswald text-white uppercase tracking-widest mb-3">
             {game.title}
           </h2>
-          <p className="relative z-10 text-sm text-gray-400 font-sans mb-6">
+          <p className="relative z-10 text-sm text-gray-400 font-sans mb-4">
             {game.desc}
           </p>
+          {getBestScore(game.id) && (
+            <div className="relative z-10 text-pubg-orange font-cyber text-sm tracking-widest mb-4 border border-pubg-orange/30 px-3 py-1 rounded bg-black/40">
+              <Trophy className="inline w-3 h-3 mr-1 -mt-1" />
+              Рекорд: {getBestScore(game.id)}
+            </div>
+          )}
           <button className="relative z-10 mt-auto px-6 py-2 bg-pubg-orange/20 text-pubg-orange border border-pubg-orange/50 rounded font-cyber text-sm uppercase tracking-widest group-hover:bg-pubg-orange group-hover:text-white transition-colors">
             Начать
           </button>
@@ -127,6 +145,10 @@ function ReactionGame() {
   const [state, setState] = useState<RState>('idle');
   const [startTime, setStartTime] = useState(0);
   const [result, setResult] = useState<number | null>(null);
+  const [best, setBest] = useState<number | null>(() => {
+    const saved = localStorage.getItem('bestReactionTime');
+    return saved ? parseInt(saved, 10) : null;
+  });
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const start = () => {
@@ -146,8 +168,13 @@ function ReactionGame() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setState('early');
     } else if (state === 'ready') {
-      setResult(Date.now() - startTime);
+      const time = Date.now() - startTime;
+      setResult(time);
       setState('result');
+      if (!best || time < best) {
+        setBest(time);
+        localStorage.setItem('bestReactionTime', time.toString());
+      }
     }
   };
 
@@ -173,6 +200,7 @@ function ReactionGame() {
           <Zap className="w-16 h-16 sm:w-24 sm:h-24 text-pubg-orange mb-4 sm:mb-6 animate-pulse" />
           <h2 className="text-3xl sm:text-5xl font-black text-white mb-2 sm:mb-4 uppercase font-oswald">Reaction Test</h2>
           <p className="text-base sm:text-xl text-gray-300">Кликните, чтобы начать</p>
+          {best && <p className="text-pubg-orange font-cyber mt-4"><Trophy className="inline w-4 h-4 mr-1 -mt-1"/> Лучший: {best} ms</p>}
         </>
       )}
       {state === 'waiting' && (
@@ -215,6 +243,10 @@ function AimGame() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [targetPos, setTargetPos] = useState({ x: 50, y: 50 });
   const [showResult, setShowResult] = useState(false);
+  const [best, setBest] = useState<number | null>(() => {
+    const saved = localStorage.getItem('bestAimScore');
+    return saved ? parseInt(saved, 10) : null;
+  });
 
   // Responsive target size: smaller on mobile to be harder, but clickable
   const targetSize = 40; 
@@ -248,6 +280,10 @@ function AimGame() {
     } else if (playing && timeLeft === 0) {
       setPlaying(false);
       setShowResult(true);
+      if (!best || score > best) {
+        setBest(score);
+        localStorage.setItem('bestAimScore', score.toString());
+      }
     }
     return () => clearTimeout(timer);
   }, [playing, timeLeft]);
@@ -271,7 +307,8 @@ function AimGame() {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20">
           <Target className="w-20 h-20 text-red-500 mb-4" />
           <h2 className="text-3xl sm:text-5xl text-white font-black font-oswald mb-2 uppercase">Aim Тренер</h2>
-          <p className="text-gray-300 text-center px-4 max-w-md mb-6">Нажимайте на появляющиеся мишени как можно быстрее. У вас 30 секунд.</p>
+          <p className="text-gray-300 text-center px-4 max-w-md mb-2">Нажимайте на появляющиеся мишени как можно быстрее. У вас 30 секунд.</p>
+          {best !== null && <p className="text-pubg-orange font-cyber mb-6"><Trophy className="inline w-4 h-4 mr-1 -mt-1"/> Рекорд: {best} мишеней</p>}
           <button onClick={start} className="flex items-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black font-oswald text-2xl uppercase rounded-lg transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
             <Play className="w-6 h-6 fill-current" /> Старт
           </button>
